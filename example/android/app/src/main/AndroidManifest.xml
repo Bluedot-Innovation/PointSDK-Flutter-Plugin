@@ -1,6 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.bluedot.bluedot_point_sdk_example">
-   <application
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+
+    <!-- These require runtime permissions on M -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- END OPTIONAL PERMISSIONS -->
+
+    <application
         android:label="bluedot_point_sdk_example"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
