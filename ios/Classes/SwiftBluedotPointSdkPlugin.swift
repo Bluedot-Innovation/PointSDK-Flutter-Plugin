@@ -120,7 +120,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
     }
     
     private func stopTempoTracking(_ result: @escaping FlutterResult) {
-        BDLocationManager.instance().stopGeoTriggering { error in
+        BDLocationManager.instance().stopTempoTracking { error in
             self.handleError(error, result)
         }
     }

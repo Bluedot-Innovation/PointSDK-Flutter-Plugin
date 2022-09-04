@@ -1,7 +1,15 @@
 package io.bluedot.bluedot_point_sdk
 
-import androidx.annotation.NonNull
-
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.graphics.Color
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import au.com.bluedot.point.net.engine.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -21,21 +29,21 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     @JvmStatic lateinit var bluedotServiceChannel: MethodChannel
   }
 
-  val flutterPluginChannel= "bluedot_point_flutter/bluedot_point_sdk"
-  val geoTriggeringEventChannel = "bluedot_point_flutter/geo_triggering_events"
-  val tempoEventChannel = "bluedot_point_flutter/tempo_events"
-  val bluedotServiceEventChannel = "bluedot_point_flutter/bluedot_service_events"
+  private val FLUTTER_PLUGIN_CHANNEL= "bluedot_point_flutter/bluedot_point_sdk"
+  private val GEO_TRIGGERING_CHANNEL = "bluedot_point_flutter/geo_triggering_events"
+  private val TEMPO_CHANNEL = "bluedot_point_flutter/tempo_events"
+  private val BLUEDOT_SERVICE_CHANNEL = "bluedot_point_flutter/bluedot_service_events"
 
   private lateinit var channel: MethodChannel
   private lateinit var serviceManager: ServiceManager
   private lateinit var context: Context
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, flutterPluginChannel)
+    channel = MethodChannel(flutterPluginBinding.binaryMessenger, FLUTTER_PLUGIN_CHANNEL)
     channel.setMethodCallHandler(this)
-    geoTriggeringChannel = MethodChannel(flutterPluginBinding.binaryMessenger, geoTriggeringEventChannel)
-    tempoChannel = MethodChannel(flutterPluginBinding.binaryMessenger, tempoEventChannel)
-    bluedotServiceChannel = MethodChannel(flutterPluginBinding.binaryMessenger, bluedotServiceEventChannel)
+    geoTriggeringChannel = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_CHANNEL)
+    tempoChannel = MethodChannel(flutterPluginBinding.binaryMessenger, TEMPO_CHANNEL)
+    bluedotServiceChannel = MethodChannel(flutterPluginBinding.binaryMessenger, BLUEDOT_SERVICE_CHANNEL)
     context = flutterPluginBinding.applicationContext
     serviceManager = ServiceManager.getInstance(flutterPluginBinding.applicationContext)
   }
@@ -73,7 +81,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     val resultListener = InitializationResultListener { error ->
       handleError(error, result)
     }
-    if (projectId.isNullOrBlank()) {
+    if (projectId.isBlank()) {
       result.error("Invalid projectId", "Project id is null or blank", "Expected project Id as String")
     } else {
       serviceManager.initialize(projectId, resultListener)
@@ -210,8 +218,10 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     val activityIntent = Intent()
     activityIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
     val pendingIntent = PendingIntent.getActivity(
-      context, 0,
-      activityIntent, PendingIntent.FLAG_UPDATE_CURRENT
+      context,
+      0,
+      activityIntent,
+      PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
     val notificationManager =
       context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -236,7 +246,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
         .setSmallIcon(android.R.mipmap.sym_def_app_icon)
       notification.build()
     } else {
-      val notification: NotificationCompat.Builder = NotificationCompat.Builder(context)
+      val notification: NotificationCompat.Builder = NotificationCompat.Builder(context, channelId)
         .setContentTitle(title)
         .setContentText(content)
         .setStyle(NotificationCompat.BigTextStyle().bigText(content))

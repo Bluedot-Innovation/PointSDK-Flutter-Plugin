@@ -1,7 +1,7 @@
 
 import 'bluedot_point_sdk_platform_interface.dart';
-import 'package:bluedot_point_sdk/tempo_builder.dart';
-import 'package:bluedot_point_sdk/geo_triggering_builder.dart';
+import 'tempo_builder.dart';
+import 'geo_triggering_builder.dart';
 
 class BluedotPointSdk {
   static const GEO_TRIGGERING = "bluedot_point_flutter/geo_triggering_events";

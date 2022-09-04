@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:bluedot_point_sdk/bluedot_point_sdk.dart';
-// import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
 void main() {
@@ -29,7 +28,6 @@ class _MyAppState extends State<MyApp> {
     initPlatformState();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     geoTriggeringChannel.setMethodCallHandler((MethodCall call) async {
       var args = call.arguments;
@@ -67,6 +65,9 @@ class _MyAppState extends State<MyApp> {
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
     if (!mounted) return;
+
+    setState(() {
+    });
 
   }
 
