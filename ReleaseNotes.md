@@ -1,3 +1,3 @@
-## 0.0.1
+# Bluedot Flutter Plugin release notes
 
-* TODO: Describe initial release.
+Version 1.0.0

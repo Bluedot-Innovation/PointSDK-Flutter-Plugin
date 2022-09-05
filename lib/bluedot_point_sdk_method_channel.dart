@@ -9,103 +9,103 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('bluedot_point_flutter/bluedot_point_sdk');
 
-  @override
+  // @override
   Future<void> initialize(String projectId) async {
     final initialize = await methodChannel.invokeMethod('initialize', {'projectId': projectId});
     return initialize;
   }
 
-  @override
+  // @override
   Future<bool> isInitialized() async {
     final isInitialized = await methodChannel.invokeMethod('isInitialized');
     return isInitialized;
   }
 
-  @override
+  // @override
   Future<bool> isGeoTriggeringRunning() async {
     final isGeoTriggeringRunning = await methodChannel.invokeMethod("isGeoTriggeringRunning");
     return isGeoTriggeringRunning;
   }
 
-  @override
+  // @override
   Future<bool> isTempoRunning() async {
     final isTempoRunning = await methodChannel.invokeMethod("isTempoRunning");
     return isTempoRunning;
   }
 
-  @override
+  // @override
   Future<void> iOSStartGeoTriggering(String? notificationTitle, String? notificationButtonText) async {
     final arguments = {"notificationTitle": notificationTitle, "notificationButtonText": notificationButtonText};
     final iOSStartGeoTriggering = await methodChannel.invokeMethod("iOSStartGeoTriggering", arguments);
     return iOSStartGeoTriggering;
   }
 
-  @override
+  // @override
   Future<void> stopGeoTriggering() async {
     final stopGeoTriggering = await methodChannel.invokeMethod("stopGeoTriggering");
     return stopGeoTriggering;
   }
 
-  @override
+  // @override
   Future<void> androidStartGeoTriggering(String? channelId, String? channelName, String? title, String? content, int? notificationId) async {
     final arguments = {"channelId": channelId, "channelName": channelName, "title": title, "content": content, "notificationId": notificationId};
     final androidStartGeoTriggering = await methodChannel.invokeMethod("androidStartGeoTriggering", arguments);
     return androidStartGeoTriggering;
   }
 
-  @override
+  // @override
   Future<void> iOSStartTempoTracking(String destinationId) async {
     final iOSStartTempoTracking = await methodChannel.invokeMethod("iOSStartTempoTracking", {"destinationId" : destinationId});
     return iOSStartTempoTracking;
   }
 
-  @override
+  // @override
   Future<void> androidStartTempoTracking(String destinationId, String channelId, String channelName, String title, String content, int? notificationId) async {
     final arguments = {"destinationId": destinationId, "channelId": channelId, "channelName": channelName, "title": title, "content": content, "notificationId": notificationId};
     final androidStartTempoTracking = await methodChannel.invokeMethod("androidStartTempoTracking", arguments);
     return androidStartTempoTracking;
   }
 
-  @override
+  // @override
   Future<void> stopTempoTracking() async {
     final stopTempoTracking = await methodChannel.invokeMethod("stopTempoTracking");
     return stopTempoTracking;
   }
 
-  @override
+  // @override
   void setCustomEventMetaData(Map<String, String> metadata) async {
     await methodChannel.invokeMethod("setCustomEventMetaData", metadata);
   }
 
-  @override
+  // @override
   void setNotificationIdResourceId(int resourceId) async {
     await methodChannel.invokeMethod("setNotificationIdMethodId", {"resourceId" : resourceId});
   }
 
-  @override
+  // @override
   void setZoneDisableByApplication(String zoneId, bool disable) async {
     await methodChannel.invokeMethod("setZoneDisableByApplication", {"zoneId": zoneId, "disable": disable});
   }
 
-  @override
+  // @override
   Future<String> getInstallRef() async {
     final installRef = await methodChannel.invokeMethod("getInstallRef");
     return installRef;
   }
 
-  @override
+  // @override
   Future<String> getSDKVersion() async {
     final getSDKVersion = await methodChannel.invokeMethod("getSDKVersion");
     return getSDKVersion;
   }
 
-  @override
+  // @override
   Future<dynamic> getZonesAndFences() async {
     final getZonesAndFences = await methodChannel.invokeMethod("getZonesAndFences");
     return getZonesAndFences;
   }
 
-  @override
+  // @override
   Future<void> reset() async {
     final resetSDK = await methodChannel.invokeMethod("reset");
     return resetSDK;
