@@ -112,20 +112,20 @@ class BluedotPointSdk {
 }
 
 class GeoTriggeringEvents {
-  static String get onZoneInfoUpdate => 'onZoneInfoUpdate';
-  static String get didEnterZone => 'didEnterZone';
-  static String get didExitZone => 'didExitZone';
+  static const onZoneInfoUpdate = 'onZoneInfoUpdate';
+  static const didEnterZone = 'didEnterZone';
+  static const didExitZone = 'didExitZone';
 }
 
 class TempoEvents {
-  static String get tempoTrackingDidStopWithError => 'tempoTrackingDidStopWithError';
+  static const tempoTrackingDidStopWithError = 'tempoTrackingDidStopWithError';
 }
 
 class BluedotServiceEvents {
-  static String get onBluedotServiceError => 'onBluedotServiceError';
+  static const onBluedotServiceError = 'onBluedotServiceError';
 
   // iOS-only events
-  static String get locationAuthorizationDidChange => 'locationAuthorizationDidChange';
-  static String get lowPowerModeDidChange => 'lowPowerModeDidChange';
-  static String get accuracyAuthorizationDidChange => 'accuracyAuthorizationDidChange';
+  static const locationAuthorizationDidChange = 'locationAuthorizationDidChange';
+  static const lowPowerModeDidChange = 'lowPowerModeDidChange';
+  static const accuracyAuthorizationDidChange = 'accuracyAuthorizationDidChange';
 }
