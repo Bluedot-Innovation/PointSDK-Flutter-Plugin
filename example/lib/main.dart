@@ -1,3 +1,4 @@
+import 'package:bluedot_point_sdk/bluedot_point_sdk.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -31,6 +32,7 @@ class _MyAppState extends State<MyApp> {
     // setState to update our non-existent appearance.
 
     if (!mounted) return;
+
   }
 
   @override

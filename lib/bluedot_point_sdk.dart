@@ -4,9 +4,9 @@ import 'tempo_builder.dart';
 import 'geo_triggering_builder.dart';
 
 class BluedotPointSdk {
-  static const GEO_TRIGGERING = "bluedot_point_flutter/geo_triggering_events";
-  static const TEMPO = "bluedot_point_flutter/tempo_events";
-  static const BLUEDOT_SERVICE = "bluedot_point_flutter/bluedot_service_events";
+  static const geoTriggering = 'bluedot_point_flutter/geo_triggering_events';
+  static const tempo = 'bluedot_point_flutter/tempo_events';
+  static const bluedotService = 'bluedot_point_flutter/bluedot_service_events';
 
   /// The singleton instance of Bluedot Point SDK
   static final instance = BluedotPointSdk();
@@ -111,3 +111,21 @@ class BluedotPointSdk {
 
 }
 
+class GeoTriggeringEvents {
+  static String get onZoneInfoUpdate => 'onZoneInfoUpdate';
+  static String get didEnterZone => 'didEnterZone';
+  static String get didExitZone => 'didExitZone';
+}
+
+class TempoEvents {
+  static String get tempoTrackingDidStopWithError => 'tempoTrackingDidStopWithError';
+}
+
+class BluedotServiceEvents {
+  static String get onBluedotServiceError => 'onBluedotServiceError';
+
+  // iOS-only events
+  static String get locationAuthorizationDidChange => 'locationAuthorizationDidChange';
+  static String get lowPowerModeDidChange => 'lowPowerModeDidChange';
+  static String get accuracyAuthorizationDidChange => 'accuracyAuthorizationDidChange';
+}
