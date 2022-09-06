@@ -8,6 +8,9 @@ class BluedotPointSdk {
   static const TEMPO = "bluedot_point_flutter/tempo_events";
   static const BLUEDOT_SERVICE = "bluedot_point_flutter/bluedot_service_events";
 
+  /// The singleton instance of Bluedot Point SDK
+  static final instance = BluedotPointSdk();
+
   /// Initialize SDK with [projectId]. You can find your [projectId] on Bluedot Canvas.
   ///
   /// If the initialization is successful, error will be returned as nil. However, if the initialization fails, an error will be provided.
