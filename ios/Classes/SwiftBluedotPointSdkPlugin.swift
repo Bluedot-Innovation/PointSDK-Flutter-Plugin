@@ -56,7 +56,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         case "stopTempoTracking":
             stopTempoTracking(result)
         case "setCustomEventMetaData":
-            setCustomEventMetaData(call)
+            setCustomEventMetaData(call, result)
         case "setZoneDisableByApplication":
             setZoneDisableByApplication(call)
         case "reset":
@@ -125,9 +125,16 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func setCustomEventMetaData(_ call: FlutterMethodCall) {
+    private func setCustomEventMetaData(_ call: FlutterMethodCall, _ result: FlutterResult) {
         if let args = call.arguments as? [String: String] {
-            BDLocationManager.instance().setCustomEventMetaData(args)
+        do {
+            try ObjC.catchException {
+                BDLocationManager.instance().setCustomEventMetaData(args)
+            }
+            result(nil)
+        } catch (let error) {
+                result(errorToFlutterError(error))
+            }
         }
     }
     

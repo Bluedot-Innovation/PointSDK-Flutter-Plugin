@@ -62,7 +62,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       "stopGeoTriggering" -> stopGeoTriggering(result)
       "androidStartTempoTracking" -> startTempoTracking(call, result)
       "stopTempoTracking" -> stopTempoTracking(result)
-      "setCustomEventMetaData" -> setCustomEventMetaData(call)
+      "setCustomEventMetaData" -> setCustomEventMetaData(call, result)
       "setNotificationIdResourceId" -> setNotificationIdResourceId(call)
       "setZoneDisableByApplication" -> setZoneDisableByApplication(call)
       "reset" -> reset(result)
@@ -173,9 +173,14 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     handleError(error, result)
   }
 
-  private fun setCustomEventMetaData(call: MethodCall) {
+  private fun setCustomEventMetaData(call: MethodCall, result: Result) {
     val metadata = call.arguments as HashMap<String, String>
-    serviceManager.setCustomEventMetaData(metadata)
+    try {
+      serviceManager.setCustomEventMetaData(metadata)
+      result.success(null)
+    } catch (err: Error) {
+      result.error(BDError.ERROR_CODE_CUSTOM_METADATA_NOT_SET.toString(), err.message, err.toString())
+    }
   }
 
   private fun setNotificationIdResourceId(call: MethodCall) {

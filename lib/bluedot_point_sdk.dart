@@ -39,7 +39,7 @@ class BluedotPointSdk {
   /// Stop GeoTriggering features of the Bluedot Point SDK
   ///
   ///  Stopping Geo-triggering feature has the intended effect of stopping location services on the device, thereby conserving battery on your user’s device unless another feature such as Tempo, is active.
-  ///  If the Geotriggering feature is stopped successful, error will be returned as nil. However, if the Stop Geotriggering fails, an error will be provided.
+  ///  If the Geo-Triggering feature is stopped successful, error will be returned as nil. However, if the Stop Geo-Triggering fails, an error will be provided.
   Future<void> stopGeoTriggering() {
     return BluedotPointSdkPlatform.instance.stopGeoTriggering();
   }
@@ -55,10 +55,12 @@ class BluedotPointSdk {
   ///
   /// Only up to 20 custom meta data fields are allowed. Will throw an exception if the number of custom fields exceeded.
   /// The custom metadata set through this API will be available on the backend in check-in activity log and via webhooks.
-  void setCustomEventMetaData(Map<String, String> metadata) {
+  ///
+  Future<void> setCustomEventMetaData(Map<String, String> metadata) {
     return BluedotPointSdkPlatform.instance.setCustomEventMetaData(metadata);
   }
 
+  /// Sets notification Id for Android foreground notification.
   void setNotificationIdResourceId(int resourceId) {
     return BluedotPointSdkPlatform.instance.setNotificationIdResourceId(resourceId);
   }

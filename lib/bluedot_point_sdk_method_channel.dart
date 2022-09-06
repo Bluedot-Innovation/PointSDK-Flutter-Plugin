@@ -62,7 +62,7 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
     return stopTempoTracking;
   }
 
-  void setCustomEventMetaData(Map<String, String> metadata) async {
+  Future<void> setCustomEventMetaData(Map<String, String> metadata) async {
     await methodChannel.invokeMethod("setCustomEventMetaData", metadata);
   }
 
