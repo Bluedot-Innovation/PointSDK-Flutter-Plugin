@@ -19,7 +19,7 @@ class AppGeoTriggeringReceiver : GeoTriggeringEventReceiver() {
             val zone: Map<String, Any?> = mapOf("id" to zoneInfo.zoneId, "name" to zoneInfo.zoneName, "customData" to customDataZone)
             zoneList.add(zone)
         }
-        val map: Map<String, Any> = mapOf("zoneInto" to zoneList)
+        val map: Map<String, Any> = mapOf("zoneInfo" to zoneList)
         sendEvent("onZoneInfoUpdate", map)
     }
 
