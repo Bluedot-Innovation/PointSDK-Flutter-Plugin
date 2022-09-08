@@ -20,7 +20,6 @@ statistics.yml
 dSYMs/
 
 # IntelliJ related
-*.iml
 *.ipr
 *.iws
 .idea/
