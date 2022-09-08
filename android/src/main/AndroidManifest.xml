@@ -1,0 +1,33 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="io.bluedot.bluedot_point_sdk">
+
+<application>
+    <receiver
+        android:name="io.bluedot.bluedot_point_sdk.BluedotErrorReceiver"
+        android:enabled="true"
+        android:exported="false"
+        >
+        <intent-filter>
+            <action android:name="io.bluedot.point.SERVICE" />
+        </intent-filter>
+    </receiver>
+    <receiver
+        android:name="io.bluedot.bluedot_point_sdk.AppTempoReceiver"
+        android:enabled="true"
+        android:exported="false"
+        >
+        <intent-filter>
+            <action android:name="io.bluedot.point.TEMPO" />
+        </intent-filter>
+    </receiver>
+    <receiver
+        android:name="io.bluedot.bluedot_point_sdk.AppGeoTriggeringReceiver"
+        android:enabled="true"
+        android:exported="false"
+        >
+        <intent-filter>
+            <action android:name="io.bluedot.point.GEOTRIGGER" />
+        </intent-filter>
+    </receiver>
+</application>
+</manifest>
