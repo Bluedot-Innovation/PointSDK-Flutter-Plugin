@@ -133,7 +133,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
             }
             result(nil)
         } catch (let error) {
-                result(errorToFlutterError(error))
+                result(errorToDict(error))
             }
         }
     }
@@ -150,6 +150,14 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
+    private func errorToDict(_ error: Error?) -> [String: String] {
+        if let error = error as? NSError {
+            return ["code": String(error.code), "message": error.localizedDescription, "details" : ""]
+        } else {
+            return [:]
+        }
+    }
+
     private func handleError(_ error: Error?, _ result: FlutterResult) {
         if let error = error as? NSError {
             let flutterError = FlutterError(code: String(error.code), message: error.localizedDescription, details: "")
@@ -159,13 +167,8 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func errorToFlutterError(_ error: Error?) -> FlutterError? {
-        if let error = error as? NSError {
-            let flutterError = FlutterError(code: String(error.code), message: error.localizedDescription, details: "")
-            return flutterError
-        } else {
-            return nil
-        }
+    private func flutterErrorToDict(_ error: FlutterError) -> [String: String] {
+        return ["code": error.code, "message" : error.message ?? "Unknown", "details": ""]
     }
 }
 
@@ -226,20 +229,18 @@ extension SwiftBluedotPointSdkPlugin: BDPGeoTriggeringEventDelegate {
 
 extension SwiftBluedotPointSdkPlugin: BDPTempoTrackingDelegate {
     public func didStopTrackingWithError(_ error: Error!) {
-        let arguments = ["error" : errorToFlutterError(error)]
-        self.tempoMethodChannel?.invokeMethod("tempoTrackingStoppedWithError", arguments: arguments)
+        self.tempoMethodChannel?.invokeMethod("tempoTrackingStoppedWithError", arguments: errorToDict(error))
     }
     
     public func tempoTrackingDidExpire() {
-        let arguments = ["error": "Tempo tracking did expire"]
-        self.tempoMethodChannel?.invokeMethod("tempoTrackingStoppedWithError", arguments: arguments)
+        let error = FlutterError(code: "", message: "Tempo tracking did expire", details: nil)
+        self.tempoMethodChannel?.invokeMethod("tempoTrackingStoppedWithError", arguments: flutterErrorToDict(error))
     }
 }
 
 extension SwiftBluedotPointSdkPlugin: BDPBluedotServiceDelegate {
     public func bluedotServiceDidReceiveError(_ error: Error!) {
-        let arguments = ["error" : errorToFlutterError(error)]
-        self.bluedotServiceMethodChannel?.invokeMethod("onBluedotServiceError", arguments: arguments)
+        self.bluedotServiceMethodChannel?.invokeMethod("onBluedotServiceError", arguments: errorToDict(error))
     }
     
     public func locationAuthorizationDidChange(fromPreviousStatus previousAuthorizationStatus: CLAuthorizationStatus, toNewStatus newAuthorizationStatus: CLAuthorizationStatus) {
