@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.license          = { :type => "Copyright",
                         :text => <<-LICENSE
                                      Point SDK
-                                     Created by Bluedot Innovation in 2018.
+                                     Created by Bluedot Innovation in 2022.
                                      Copyright © 2022 Bluedot Innovation. All rights reserved.
                                      By downloading or using the Bluedot Point SDK for iOS, You agree to the Bluedot Terms and Conditions
                                      https://bluedot.io/agreements/#terms and Privacy Policy https://bluedot.io/agreements/#privacy
