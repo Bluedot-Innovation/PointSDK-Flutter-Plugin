@@ -152,7 +152,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
     
     private func handleError(_ error: Error?, _ result: FlutterResult) {
         if let error = error as? NSError {
-            let flutterError = FlutterError(code: String(error.code), message: error.localizedDescription, details: error.userInfo)
+            let flutterError = FlutterError(code: String(error.code), message: error.localizedDescription, details: "")
             result(flutterError)
         } else {
             result(nil)
@@ -161,7 +161,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
     
     private func errorToFlutterError(_ error: Error?) -> FlutterError? {
         if let error = error as? NSError {
-            let flutterError = FlutterError(code: String(error.code), message: error.localizedDescription, details: error.userInfo)
+            let flutterError = FlutterError(code: String(error.code), message: error.localizedDescription, details: "")
             return flutterError
         } else {
             return nil
