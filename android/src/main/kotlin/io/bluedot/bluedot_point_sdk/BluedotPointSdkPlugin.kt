@@ -220,8 +220,8 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     content: String
   ): Notification {
 
-    val activityIntent = Intent()
-    activityIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    val activityIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+    activityIntent?.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
     val pendingIntent = PendingIntent.getActivity(
       context,
       0,
