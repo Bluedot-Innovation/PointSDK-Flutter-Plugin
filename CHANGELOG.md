@@ -1,3 +1,4 @@
-# Bluedot Flutter Plugin release notes
+# Flutter Bluedot Point SDK Plugin release notes
 
-Version 1.0.0
+## 1.0.0
+- Initial version
