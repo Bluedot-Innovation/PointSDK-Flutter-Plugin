@@ -20,9 +20,9 @@ EXTERNAL SOURCES:
     :path: Flutter
 
 SPEC CHECKSUMS:
-  bluedot_point_sdk: d29580c4789e54c46cb4be7acfe97812e4cceee7
+  bluedot_point_sdk: ad40a4c743fd48c44b19daaeb71fcf68d5bf6d5b
   BluedotPointSDK: cfd2a0c60867f93c838099803db6d8a1dca6388b
-  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
 
 PODFILE CHECKSUM: c4c93c5f6502fe2754f48404d3594bf779584011
 

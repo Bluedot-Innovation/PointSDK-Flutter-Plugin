@@ -1,12 +1,12 @@
 name: bluedot_point_sdk
 description: Bluedot Point SDK for Flutter
 version: 1.0.0
-homepage: "https://bluedot.io"
-repository:  "https://github.com/Bluedot-Innovation/PointSDK-Flutter-Plugin"
+homepage: 'https://bluedot.io'
+repository:  'https://github.com/Bluedot-Innovation/PointSDK-Flutter-Plugin'
 
 environment:
-  sdk: ">=2.17.6 <3.0.0"
-  flutter: ">=2.5.0"
+  sdk: '>=2.17.6 <3.0.0'
+  flutter: '>=2.5.0'
 
 dependencies:
   flutter:
@@ -49,12 +49,12 @@ flutter:
   # For details regarding assets in packages, see
   # https://flutter.dev/assets-and-images/#from-packages
   #
-  # An image asset can refer to one or more resolution-specific "variants", see
+  # An image asset can refer to one or more resolution-specific 'variants', see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
   # To add custom fonts to your plugin package, add a fonts section here,
-  # in this "flutter" section. Each entry in this list should have a
-  # "family" key with the font family name, and a "fonts" key with a
+  # in this 'flutter' section. Each entry in this list should have a
+  # 'family' key with the font family name, and a 'fonts' key with a
   # list giving the asset and other descriptors for the font. For
   # example:
   # fonts:
