@@ -109,6 +109,11 @@ class BluedotPointSdk {
     return TempoBuilder();
   }
 
+  /// Enable/disable background location updates
+  void allowBackgroundLocationUpdates(bool value) {
+    return BluedotPointSdkPlatform.instance.allowBackgroundLocationUpdates(value);
+  }
+
 }
 
 class GeoTriggeringEvents {
