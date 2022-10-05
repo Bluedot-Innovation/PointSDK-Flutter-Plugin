@@ -108,7 +108,7 @@ class BluedotPointSdk {
     return TempoBuilder();
   }
 
-  /// Enable or disable background location updates
+  /// Enable or disable background location updates (iOS only)
   void allowBackgroundLocationUpdates(bool value) {
     return BluedotPointSdkPlatform.instance.allowBackgroundLocationUpdates(value);
   }
