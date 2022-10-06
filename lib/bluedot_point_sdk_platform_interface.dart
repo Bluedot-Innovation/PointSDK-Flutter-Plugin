@@ -24,6 +24,6 @@ abstract class BluedotPointSdkPlatform extends PlatformInterface {
   }
   
   Future<void> unimplementedError() {
-    throw UnimplementedError("Unimplemented Error");
+    throw UnimplementedError('Unimplemented Error');
   }
 }

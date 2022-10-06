@@ -2,10 +2,10 @@ import 'bluedot_point_sdk_platform_interface.dart';
 import 'dart:io' show Platform;
 
 class TempoBuilder {
-  String channelId = "";
-  String channelName = "";
-  String androidNotificationTitle = "";
-  String androidNotificationContent = "";
+  String channelId = '';
+  String channelName = '';
+  String androidNotificationTitle = '';
+  String androidNotificationContent = '';
   int androidNotificationId = -1;
 
   String? iosNotificationTitle;

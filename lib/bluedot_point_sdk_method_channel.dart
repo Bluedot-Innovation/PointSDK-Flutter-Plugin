@@ -20,78 +20,82 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
   }
 
   Future<bool> isGeoTriggeringRunning() async {
-    final isGeoTriggeringRunning = await methodChannel.invokeMethod("isGeoTriggeringRunning");
+    final isGeoTriggeringRunning = await methodChannel.invokeMethod('isGeoTriggeringRunning');
     return isGeoTriggeringRunning;
   }
 
   Future<bool> isTempoRunning() async {
-    final isTempoRunning = await methodChannel.invokeMethod("isTempoRunning");
+    final isTempoRunning = await methodChannel.invokeMethod('isTempoRunning');
     return isTempoRunning;
   }
 
   Future<void> iOSStartGeoTriggering(String? notificationTitle, String? notificationButtonText) async {
-    final arguments = {"notificationTitle": notificationTitle, "notificationButtonText": notificationButtonText};
-    final iOSStartGeoTriggering = await methodChannel.invokeMethod("iOSStartGeoTriggering", arguments);
+    final arguments = {'notificationTitle': notificationTitle, 'notificationButtonText': notificationButtonText};
+    final iOSStartGeoTriggering = await methodChannel.invokeMethod('iOSStartGeoTriggering', arguments);
     return iOSStartGeoTriggering;
   }
 
   Future<void> stopGeoTriggering() async {
-    final stopGeoTriggering = await methodChannel.invokeMethod("stopGeoTriggering");
+    final stopGeoTriggering = await methodChannel.invokeMethod('stopGeoTriggering');
     return stopGeoTriggering;
   }
 
   Future<void> androidStartGeoTriggering(String? channelId, String? channelName, String? title, String? content, int? notificationId) async {
-    final arguments = {"channelId": channelId, "channelName": channelName, "title": title, "content": content, "notificationId": notificationId};
-    final androidStartGeoTriggering = await methodChannel.invokeMethod("androidStartGeoTriggering", arguments);
+    final arguments = {'channelId': channelId, 'channelName': channelName, 'title': title, 'content': content, 'notificationId': notificationId};
+    final androidStartGeoTriggering = await methodChannel.invokeMethod('androidStartGeoTriggering', arguments);
     return androidStartGeoTriggering;
   }
 
   Future<void> iOSStartTempoTracking(String destinationId) async {
-    final iOSStartTempoTracking = await methodChannel.invokeMethod("iOSStartTempoTracking", {"destinationId" : destinationId});
+    final iOSStartTempoTracking = await methodChannel.invokeMethod('iOSStartTempoTracking', {'destinationId' : destinationId});
     return iOSStartTempoTracking;
   }
 
   Future<void> androidStartTempoTracking(String destinationId, String channelId, String channelName, String title, String content, int? notificationId) async {
-    final arguments = {"destinationId": destinationId, "channelId": channelId, "channelName": channelName, "title": title, "content": content, "notificationId": notificationId};
-    final androidStartTempoTracking = await methodChannel.invokeMethod("androidStartTempoTracking", arguments);
+    final arguments = {'destinationId': destinationId, 'channelId': channelId, 'channelName': channelName, 'title': title, 'content': content, 'notificationId': notificationId};
+    final androidStartTempoTracking = await methodChannel.invokeMethod('androidStartTempoTracking', arguments);
     return androidStartTempoTracking;
   }
 
   Future<void> stopTempoTracking() async {
-    final stopTempoTracking = await methodChannel.invokeMethod("stopTempoTracking");
+    final stopTempoTracking = await methodChannel.invokeMethod('stopTempoTracking');
     return stopTempoTracking;
   }
 
   Future<void> setCustomEventMetaData(Map<String, String> metadata) async {
-    await methodChannel.invokeMethod("setCustomEventMetaData", metadata);
+    await methodChannel.invokeMethod('setCustomEventMetaData', metadata);
   }
 
   void setNotificationIdResourceId(int resourceId) async {
-    await methodChannel.invokeMethod("setNotificationIdMethodId", {"resourceId" : resourceId});
+    await methodChannel.invokeMethod('setNotificationIdMethodId', {'resourceId' : resourceId});
   }
 
   void setZoneDisableByApplication(String zoneId, bool disable) async {
-    await methodChannel.invokeMethod("setZoneDisableByApplication", {"zoneId": zoneId, "disable": disable});
+    await methodChannel.invokeMethod('setZoneDisableByApplication', {'zoneId': zoneId, 'disable': disable});
   }
 
   Future<String> getInstallRef() async {
-    final installRef = await methodChannel.invokeMethod("getInstallRef");
+    final installRef = await methodChannel.invokeMethod('getInstallRef');
     return installRef;
   }
 
   Future<String> getSDKVersion() async {
-    final getSDKVersion = await methodChannel.invokeMethod("getSDKVersion");
+    final getSDKVersion = await methodChannel.invokeMethod('getSDKVersion');
     return getSDKVersion;
   }
 
   Future<dynamic> getZonesAndFences() async {
-    final getZonesAndFences = await methodChannel.invokeMethod("getZonesAndFences");
+    final getZonesAndFences = await methodChannel.invokeMethod('getZonesAndFences');
     return getZonesAndFences;
   }
 
   Future<void> reset() async {
-    final resetSDK = await methodChannel.invokeMethod("reset");
+    final resetSDK = await methodChannel.invokeMethod('reset');
     return resetSDK;
+  }
+
+  void allowBackgroundLocationUpdates(bool value) async {
+    await methodChannel.invokeMethod('allowBackgroundLocationUpdates', {'value': value});
   }
 
 }
