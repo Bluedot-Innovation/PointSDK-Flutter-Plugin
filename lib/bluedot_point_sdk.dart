@@ -114,8 +114,8 @@ class BluedotPointSdk {
   /// If allowsBackgroundLocationUpdates is set to true while the app is in the background, or the user changes the location permission to While using the app while the app is in the background, the background location usage indicator will not be enabled.
   /// The default value of allowsBackgroundLocationUpdates is false, and it can be disabled while the app is either in the foreground or the background.
   /// If the application requests Always location authorization, be sure to check that Always location authorization has not been granted before setting allowsBackgroundLocationUpdates to false, as setting the value to false will prevent the app from accessing location from the background.
-  void allowBackgroundLocationUpdates(bool value) {
-    return BluedotPointSdkPlatform.instance.allowBackgroundLocationUpdates(value);
+  void allowsBackgroundLocationUpdates(bool value) {
+    return BluedotPointSdkPlatform.instance.allowsBackgroundLocationUpdates(value);
   }
 
 }
