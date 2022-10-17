@@ -70,8 +70,8 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         case "getZonesAndFences":
             let zonesAndFences = BDLocationManager.instance().zoneInfos
             result(zonesAndFences)
-        case "allowBackgroundLocationUpdates":
-            allowBackgroundLocationUpdates(call)
+        case "allowsBackgroundLocationUpdates":
+            allowsBackgroundLocationUpdates(call)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -152,7 +152,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func allowBackgroundLocationUpdates(_ call: FlutterMethodCall) {
+    private func allowsBackgroundLocationUpdates(_ call: FlutterMethodCall) {
         if let args = call.arguments as? [String: Any], let value = args["value"] as? Bool {
             BDLocationManager.instance().allowsBackgroundLocationUpdates = value
         }
