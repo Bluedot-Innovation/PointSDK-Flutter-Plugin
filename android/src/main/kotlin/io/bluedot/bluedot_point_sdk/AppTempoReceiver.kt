@@ -3,6 +3,7 @@ package io.bluedot.bluedot_point_sdk
 import android.content.Context
 import au.com.bluedot.point.net.engine.BDError
 import au.com.bluedot.point.net.engine.TempoTrackingReceiver
+import android.util.Log
 
 class AppTempoReceiver : TempoTrackingReceiver() {
     /**
