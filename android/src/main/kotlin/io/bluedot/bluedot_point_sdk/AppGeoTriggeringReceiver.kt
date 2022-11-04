@@ -61,6 +61,13 @@ class AppGeoTriggeringReceiver : GeoTriggeringEventReceiver() {
     }
 
     private fun sendEvent(eventName: String, params: Map<String, Any?>) {
-        BluedotPointSdkPlugin.geoTriggeringChannel.invokeMethod(eventName, params)
+        try {
+            BluedotPointSdkPlugin.geoTriggeringChannel.invokeMethod(eventName, params)
+        } catch (ex: Exception) {
+            Log.v("Danny", "sendEvent failed: $ex")
+        }
     }
+//    private fun sendEvent(eventName: String, params: Map<String, Any?>) {
+//        BluedotPointSdkPlugin.geoTriggeringChannel.invokeMethod(eventName, params)
+//    }
 }
