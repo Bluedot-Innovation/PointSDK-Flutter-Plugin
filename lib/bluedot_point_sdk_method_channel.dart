@@ -66,11 +66,11 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
     await methodChannel.invokeMethod('setCustomEventMetaData', metadata);
   }
 
-  void setNotificationIcon(String icon) async {
+  Future<void> setNotificationIcon(String icon) async {
     await methodChannel.invokeMethod('setNotificationIcon', {'icon' : icon});
   }
 
-  void setZoneDisableByApplication(String zoneId, bool disable) async {
+  Future<void> setZoneDisableByApplication(String zoneId, bool disable) async {
     await methodChannel.invokeMethod('setZoneDisableByApplication', {'zoneId': zoneId, 'disable': disable});
   }
 
