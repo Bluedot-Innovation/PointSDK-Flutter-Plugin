@@ -2,7 +2,8 @@ group 'io.bluedot.bluedot_point_sdk'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.6.10'
+    ext.kotlin_version = '1.7.10'
+    ext.sdk_version = '15.5.3'
     repositories {
         google()
         mavenCentral()
@@ -49,5 +50,5 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.gitlab.bluedotio.android:point_sdk_android:15.4.2'
+    implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
 }
