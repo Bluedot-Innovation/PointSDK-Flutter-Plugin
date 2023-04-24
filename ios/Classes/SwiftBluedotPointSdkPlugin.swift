@@ -57,6 +57,8 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
             stopTempoTracking(result)
         case "setCustomEventMetaData":
             setCustomEventMetaData(call, result)
+        case "setNotificationIcon":
+            setNotificationIcon(call, result)
         case "setZoneDisableByApplication":
             setZoneDisableByApplication(call)
         case "reset":
@@ -144,6 +146,10 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         if let args = call.arguments as? [String: Any], let zoneId = args["zoneId"] as? String, let disable = args["disable"] as? Bool {
             BDLocationManager.instance().setZone(zoneId, disableByApplication: disable)
         }
+    }
+
+    private func setNotificationIcon(_ call: FlutterMethodCall) {
+        // Do nothing for iOS, only application for Android
     }
     
     private func reset(_ result: @escaping FlutterResult) {
