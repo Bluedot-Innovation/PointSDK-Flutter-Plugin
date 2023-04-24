@@ -148,7 +148,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         }
     }
 
-    private func setNotificationIcon(_ call: FlutterMethodCall) {
+    private func setNotificationIcon(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         // Do nothing for iOS, only application for Android
     }
     
