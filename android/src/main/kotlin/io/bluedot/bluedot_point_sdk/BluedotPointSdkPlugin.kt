@@ -183,10 +183,10 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
-  private fun setNotificationIdResourceId(call: MethodCall) {
-    val resourceId: Int? = call.argument("resourceId")
-    if (resourceId != null) {
-      serviceManager.setNotificationIDResourceID(resourceId)
+  private fun setNotificationIcon(call: MethodCall) {
+    val icon: String? = call.argument("icon")
+    if (icon != null) {
+      serviceManager.setNotificationIcon(icon)
     }
   }
 
