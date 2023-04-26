@@ -62,13 +62,13 @@ class BluedotPointSdk {
     return BluedotPointSdkPlatform.instance.setCustomEventMetaData(metadata);
   }
 
-  /// Sets notification Id for Android foreground notification.
-  void setNotificationIdResourceId(int resourceId) {
-    return BluedotPointSdkPlatform.instance.setNotificationIdResourceId(resourceId);
+  /// Sets notification icon for Android foreground notification.
+  Future<void> setNotificationIcon(String icon) {
+    return BluedotPointSdkPlatform.instance.setNotificationIcon(icon);
   }
 
   /// Disabled or re-enable a specific zone by its [zoneId].
-  void setZoneDisableByApplication(String zoneId, bool disable) {
+  Future<void> setZoneDisableByApplication(String zoneId, bool disable) {
     return BluedotPointSdkPlatform.instance.setZoneDisableByApplication(zoneId, disable);
   }
 
