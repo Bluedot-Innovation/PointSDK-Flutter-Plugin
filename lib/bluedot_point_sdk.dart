@@ -62,7 +62,10 @@ class BluedotPointSdk {
     return BluedotPointSdkPlatform.instance.setCustomEventMetaData(metadata);
   }
 
-  /// Sets notification icon for Android foreground notification.
+  /// By default, PointSDK uses `ic_stat_name` icon for GeoTriggering and Tempo services foreground notification icons.
+  /// Use this method to assign a custom notification icon for Android foreground notification.
+  /// If [icon] is null or doesn't exist in android's res/drawable or res/mipmap,
+  /// the default one `ic_stat_name` will be used. If also not available, then app launcher icon is used.
   Future<void> setNotificationIcon(String icon) {
     return BluedotPointSdkPlatform.instance.setNotificationIcon(icon);
   }
