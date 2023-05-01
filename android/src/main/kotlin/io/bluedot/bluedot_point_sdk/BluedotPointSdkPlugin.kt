@@ -194,7 +194,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     updateNotificationResource(icon)
   }
 
-  private fun updateNotificationResource(icon: String) {
+  private fun updateNotificationResource(icon: String?) {
     // find the resourceID int from the passed in icon name
     var resourceID = findIconResourceId(icon)
     if (resourceID == 0) {
@@ -210,7 +210,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   // Return the resourceId if available for icon name. Returns 0 if such resource doesn't exist
-  private fun findIconResourceId(icon: String): Int {
+  private fun findIconResourceId(icon: String?): Int {
     if (icon == null) {
       return 0
     }
