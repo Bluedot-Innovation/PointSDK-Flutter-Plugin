@@ -37,6 +37,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel: MethodChannel
   private lateinit var serviceManager: ServiceManager
   private lateinit var context: Context
+  private var notificationResourceId = 0
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, FLUTTER_PLUGIN_CHANNEL)
@@ -63,7 +64,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       "androidStartTempoTracking" -> startTempoTracking(call, result)
       "stopTempoTracking" -> stopTempoTracking(result)
       "setCustomEventMetaData" -> setCustomEventMetaData(call, result)
-      "setNotificationIdResourceId" -> setNotificationIdResourceId(call)
+      "setNotificationIcon" -> setNotificationIcon(call)
       "setZoneDisableByApplication" -> setZoneDisableByApplication(call)
       "reset" -> reset(result)
       "getInstallRef" -> result.success(serviceManager.installRef)
@@ -89,6 +90,11 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun startGeoTriggering(call: MethodCall, result: Result) {
+    // set a default notification icon if not yet set
+    if (notificationResourceId == 0) {
+      updateNotificationResource(null)
+    }
+
     val channelId: String? = call.argument("channelId")
     val channelName: String? = call.argument("channelName")
     val title: String? = call.argument("title")
@@ -183,12 +189,42 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
-  private fun setNotificationIdResourceId(call: MethodCall) {
-    val resourceId: Int? = call.argument("resourceId")
-    if (resourceId != null) {
-      serviceManager.setNotificationIDResourceID(resourceId)
+  private fun setNotificationIcon(call: MethodCall) {
+    val icon: String? = call.argument("icon")
+    updateNotificationResource(icon)
+  }
+
+  private fun updateNotificationResource(icon: String?) {
+    // find the resourceID int from the passed in icon name
+    var resourceID = findIconResourceId(icon)
+    if (resourceID == 0) {
+      // fallback to the default name of Notification Icon `ic_stat_name`
+      resourceID = findIconResourceId("ic_stat_name")
+    }
+
+    // save the resourceId and update to Bluedot PointSDK
+    notificationResourceId = resourceID
+    if (resourceID != 0) {
+      serviceManager.setNotificationIDResourceID(resourceID)
     }
   }
+
+  // Return the resourceId if available for icon name. Returns 0 if such resource doesn't exist
+  private fun findIconResourceId(icon: String?): Int {
+    if (icon == null) {
+      return 0
+    }
+    // find the resourceID int from the passed in icon name
+    val packageName: String = context.packageName
+    var resourceID: Int =
+      context.resources.getIdentifier(icon, "drawable", packageName)
+    if (resourceID == 0) {
+      // not found in drawable, try mipmap
+      resourceID = context.resources.getIdentifier(icon, "mipmap", packageName)
+    }
+    return resourceID
+  }
+
 
   private fun setZoneDisableByApplication(call: MethodCall) {
     val zoneId: String? = call.argument("zoneId")
@@ -228,6 +264,10 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       activityIntent,
       PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
     )
+    // use the passed in resourceId as notification icon, if not available use the app icon
+    val iconResourceId =
+      if (notificationResourceId != 0) notificationResourceId else android.R.mipmap.sym_def_app_icon
+
     val notificationManager =
       context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -248,7 +288,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
         .setOngoing(true)
         .setCategory(Notification.CATEGORY_SERVICE)
         .setContentIntent(pendingIntent)
-        .setSmallIcon(android.R.mipmap.sym_def_app_icon)
+        .setSmallIcon(iconResourceId)
       notification.build()
     } else {
       val notification: NotificationCompat.Builder = NotificationCompat.Builder(context, channelId)
@@ -259,7 +299,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
         .setCategory(Notification.CATEGORY_SERVICE)
         .setPriority(NotificationManager.IMPORTANCE_HIGH)
         .setContentIntent(pendingIntent)
-        .setSmallIcon(android.R.mipmap.sym_def_app_icon)
+        .setSmallIcon(iconResourceId)
       notification.build()
     }
   }

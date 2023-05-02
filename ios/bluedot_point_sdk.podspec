@@ -4,7 +4,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'bluedot_point_sdk'
-  s.version          = '1.0.0'
+  s.version          = '1.0.1'
   s.summary          = 'Bluedot Point SDK for Flutter'
   s.description      = <<-DESC
                         Bluedot Point SDK for Flutter
@@ -13,8 +13,8 @@ Pod::Spec.new do |s|
   s.license          = { :type => "Copyright",
                         :text => <<-LICENSE
                                      Point SDK
-                                     Created by Bluedot Innovation in 2022.
-                                     Copyright © 2022 Bluedot Innovation. All rights reserved.
+                                     Created by Bluedot Innovation in 2023.
+                                     Copyright © 2023 Bluedot Innovation. All rights reserved.
                                      By downloading or using the Bluedot Point SDK for iOS, You agree to the Bluedot Terms and Conditions
                                      https://bluedot.io/agreements/#terms and Privacy Policy https://bluedot.io/agreements/#privacy
                                      and Billing Policy https://bluedot.io/agreements/#billing
@@ -25,7 +25,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/Bluedot-Innovation/PointSDK-Flutter-Plugin' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'BluedotPointSDK', '15.6.4'
+  s.dependency 'BluedotPointSDK', '15.6.7'
   s.platform = :ios, '12.0'
 
   # Flutter.framework does not contain a i386 slice.
