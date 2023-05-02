@@ -90,6 +90,11 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   }
 
   private fun startGeoTriggering(call: MethodCall, result: Result) {
+    // set a default notification icon if not yet set
+    if (notificationResourceId == 0) {
+      updateNotificationResource(null)
+    }
+
     val channelId: String? = call.argument("channelId")
     val channelName: String? = call.argument("channelName")
     val title: String? = call.argument("title")
@@ -186,23 +191,40 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
 
   private fun setNotificationIcon(call: MethodCall) {
     val icon: String? = call.argument("icon")
-    if (icon != null) {
-      // find the resourceID int from the passed in icon name
-      val packageName: String = context.packageName
-      var resourceID: Int =
-        context.resources.getIdentifier(icon, "drawable", packageName)
-      if (resourceID == 0) {
-        // not found in drawable, try mipmap
-        resourceID = context.resources.getIdentifier(icon, "mipmap", packageName)
-      }
+    updateNotificationResource(icon)
+  }
 
-      // save the resourceId
-      notificationResourceId = resourceID
-      if (resourceID != 0) {
-        serviceManager.setNotificationIDResourceID(resourceID)
-      }
+  private fun updateNotificationResource(icon: String?) {
+    // find the resourceID int from the passed in icon name
+    var resourceID = findIconResourceId(icon)
+    if (resourceID == 0) {
+      // fallback to the default name of Notification Icon `ic_stat_name`
+      resourceID = findIconResourceId("ic_stat_name")
+    }
+
+    // save the resourceId and update to Bluedot PointSDK
+    notificationResourceId = resourceID
+    if (resourceID != 0) {
+      serviceManager.setNotificationIDResourceID(resourceID)
     }
   }
+
+  // Return the resourceId if available for icon name. Returns 0 if such resource doesn't exist
+  private fun findIconResourceId(icon: String?): Int {
+    if (icon == null) {
+      return 0
+    }
+    // find the resourceID int from the passed in icon name
+    val packageName: String = context.packageName
+    var resourceID: Int =
+      context.resources.getIdentifier(icon, "drawable", packageName)
+    if (resourceID == 0) {
+      // not found in drawable, try mipmap
+      resourceID = context.resources.getIdentifier(icon, "mipmap", packageName)
+    }
+    return resourceID
+  }
+
 
   private fun setZoneDisableByApplication(call: MethodCall) {
     val zoneId: String? = call.argument("zoneId")
