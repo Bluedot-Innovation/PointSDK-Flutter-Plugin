@@ -11,52 +11,51 @@ class BluedotPointSdk {
   /// The singleton instance of Bluedot Point SDK
   static final instance = BluedotPointSdk();
 
-  /// Initialize SDK with [projectId]. You can find your [projectId] on Bluedot
-  /// Canvas.
+  /// Initialize PointSDK with [projectId]. You can find your [projectId] on Bluedot
+  /// Canvas portal.
   ///
   /// If the initialization is successful, error will be returned as nil.
-  /// However, if the initialization fails, an error will be provided.
+  /// Otherwise, an error will be provided.
   Future<void> initialize(String projectId) {
     return BluedotPointSdkPlatform.instance.initialize(projectId);
   }
 
-  /// Method to determine if the Point SDK is initialized.
+  /// Method to determine if the PointSDK is initialized.
   ///
-  /// Returns whether Bluedot Point SDK is initialized or not.
+  /// Returns `true` if PointSDK is initialized, `false` otherwise.
   Future<bool> isInitialized() {
     return BluedotPointSdkPlatform.instance.isInitialized();
   }
 
   /// Method to determine if GeoTriggering is running.
   ///
-  /// Returns whether GeoTriggering is running.
+  /// Returns `true` if GeoTriggering is running, `false` otherwise.
   Future<bool> isGeoTriggeringRunning() {
     return BluedotPointSdkPlatform.instance.isGeoTriggeringRunning();
   }
 
   /// Method to determine if Tempo is running
   ///
-  /// Returns whether Tempo is running
+  /// Returns `true` if Tempo is running, `false` otherwise.
   Future<bool> isTempoRunning() {
     return BluedotPointSdkPlatform.instance.isTempoRunning();
   }
 
-  /// Stop GeoTriggering features of the Bluedot Point SDK
+  /// Stops GeoTriggering feature of the Bluedot PointSDK
   ///
   /// Stopping Geo-triggering feature has the intended effect of stopping
   /// location services on the device, thereby conserving battery on your
   /// user’s device unless another feature such as Tempo, is active.
-  /// If the Geo-Triggering feature is stopped successful, error will be
-  /// returned as nil. However, if the Stop Geo-Triggering fails, an error
-  /// will be provided.
+  /// If  Geo-Triggering feature is stopped successfully, error will be
+  /// returned as nil. Otherwise, an error will be provided.
   Future<void> stopGeoTriggering() {
     return BluedotPointSdkPlatform.instance.stopGeoTriggering();
   }
 
-  /// Stop Tempo Tracking
+  /// Stops Tempo Tracking
   ///
-  /// If the Tempo is stopped successful, error will be returned as nil.
-  /// However, if the Start Tempo fails, an error will be provided.
+  /// If the Tempo is stopped successfully, error will be returned as nil.
+  /// Otherwise, an error will be provided.
   Future<void> stopTempoTracking() {
     return BluedotPointSdkPlatform.instance.stopTempoTracking();
   }
@@ -64,7 +63,7 @@ class BluedotPointSdk {
   /// Sets custom metadata for Notification events.
   ///
   /// Only up to 20 custom meta data fields are allowed.
-  /// Will throw an exception if the number of custom fields exceeded.
+  /// Will throw an exception if the number of custom fields exceeds the limit.
   /// The custom metadata set through this API will be available on the backend
   /// in check-in activity log and via webhooks.
   Future<void> setCustomEventMetaData(Map<String, String> metadata) {
@@ -89,12 +88,12 @@ class BluedotPointSdk {
     return BluedotPointSdkPlatform.instance.setNotificationIcon(icon);
   }
 
-  /// Disabled or re-enable a specific zone by its [zoneId].
+  /// Disable or re-enable a specific zone by its [zoneId].
   Future<void> setZoneDisableByApplication(String zoneId, bool disable) {
     return BluedotPointSdkPlatform.instance.setZoneDisableByApplication(zoneId, disable);
   }
 
-  /// Returns the installation reference of this Point SDK enabled App.
+  /// Returns the installation reference of this PointSDK enabled App.
   ///
   /// This is the same as the Install Ref that appears in a Zone's Activity Log
   /// in Canvas, or queried via Open API.
@@ -109,8 +108,8 @@ class BluedotPointSdk {
     return BluedotPointSdkPlatform.instance.getSDKVersion();
   }
 
-  /// Method to get a collection of `BDZoneInfo` objects, corresponding to the
-  /// Zones you created for this project, in the Canvas interface.
+  /// Returns a collection of `BDZoneInfo` objects, corresponding to the
+  /// Zones created for this project in the Canvas portal.
   Future<dynamic> getZonesAndFences() {
     return BluedotPointSdkPlatform.instance.getZonesAndFences();
   }
