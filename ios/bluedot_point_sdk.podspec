@@ -4,7 +4,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'bluedot_point_sdk'
-  s.version          = '1.0.1'
+  s.version          = '2.0.0'
   s.summary          = 'Bluedot Point SDK for Flutter'
   s.description      = <<-DESC
                         Bluedot Point SDK for Flutter
@@ -25,10 +25,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/Bluedot-Innovation/PointSDK-Flutter-Plugin' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'BluedotPointSDK', '15.6.7'
+  s.dependency 'BluedotPointSDK', '16.0.0-rc4'
   s.platform = :ios, '12.0'
-
-  # Flutter.framework does not contain a i386 slice.
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386 arm64' }
   s.swift_version = '5.0'
 end

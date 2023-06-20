@@ -3,6 +3,8 @@ package io.bluedot.bluedot_point_sdk
 import android.content.Context
 import au.com.bluedot.point.net.engine.BDError
 import au.com.bluedot.point.net.engine.TempoTrackingReceiver
+import au.com.bluedot.point.net.engine.event.TempoTrackingUpdate
+import org.json.JSONObject
 
 class AppTempoReceiver : TempoTrackingReceiver() {
     /**
@@ -17,6 +19,13 @@ class AppTempoReceiver : TempoTrackingReceiver() {
     override fun tempoStoppedWithError(error: BDError, context: Context) {
         val arguments: Map<String, String> = mapOf("code" to error.errorCode.toString(), "message" to error.reason, "details" to error.toString())
         sendEvent("tempoTrackingStoppedWithError", arguments)
+    }
+
+    override fun onTempoTrackingUpdate(tempoTrackingUpdate: TempoTrackingUpdate, context: Context) {
+
+        // TODO: map TempoTrackingUpdate model to arguments
+        val arguments: Map<String, String> = mapOf("eta" to tempoTrackingUpdate.eta.toString())
+        sendEvent("tempoTrackingUpdated", arguments)
     }
 
     private fun sendEvent(eventName: String, params: Map<String, Any?>) {
