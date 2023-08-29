@@ -25,7 +25,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/Bluedot-Innovation/PointSDK-Flutter-Plugin' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'BluedotPointSDK', '15.6.7'
+  s.dependency 'BluedotPointSDK', '16.0.0-rc4'
   s.platform = :ios, '12.0'
 
   # Flutter.framework does not contain a i386 slice.
