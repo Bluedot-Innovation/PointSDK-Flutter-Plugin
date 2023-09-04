@@ -174,6 +174,7 @@ class GeoTriggeringEvents {
 
 class TempoEvents {
   static const tempoTrackingStoppedWithError = 'tempoTrackingStoppedWithError';
+  static const tempoTrackingDidUpdate = 'tempoTrackingDidUpdate';
 }
 
 class BluedotServiceEvents {

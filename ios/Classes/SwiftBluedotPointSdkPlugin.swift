@@ -205,7 +205,7 @@ extension SwiftBluedotPointSdkPlugin: BDPGeoTriggeringEventDelegate {
         let json = (try? exitEvent.toJson() as String?) ?? ""
         sendEvent(eventName: "didExitZone", modelName: "GeoTriggerEvent", jsonStr: json)
     }
-    
+
     // Use Dart to parse the json string and pass the resulting object to the
     // client callback.
     private func sendEvent(eventName: String, modelName: String, jsonStr: String) -> Any {
@@ -225,6 +225,21 @@ extension SwiftBluedotPointSdkPlugin: BDPTempoTrackingDelegate {
     public func tempoTrackingDidExpire() {
         let error = FlutterError(code: "", message: "Tempo tracking did expire", details: nil)
         self.tempoMethodChannel?.invokeMethod("tempoTrackingStoppedWithError", arguments: flutterErrorToDict(error))
+    }
+
+    public func tempoTrackingDidUpdate(_ tempoUpdate: TempoTrackingUpdate) {
+        let json = (try? tempoUpdate.toJson() as String?) ?? ""
+        sendTempoEvent(eventName: "tempoTrackingDidUpdate", modelName: "TempoTrackingUpdate", jsonStr: json)
+    }
+
+    // Use Dart to parse the json string and pass the resulting object to the
+    // client callback.
+    private func sendTempoEvent(eventName: String, modelName: String, jsonStr: String) -> Any {
+        self.geoTriggeringUtilsChannel?.invokeMethod(
+            "parseJson",
+            arguments : [modelName, jsonStr], result: {(r:Any?) -> () in
+                self.tempoMethodChannel?.invokeMethod(eventName, arguments: r)
+        })
     }
 }
 
