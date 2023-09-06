@@ -1,9 +1,9 @@
 group 'io.bluedot.bluedot_point_sdk'
-version '1.0.1'
+version '2.0.0'
 
 buildscript {
     ext.kotlin_version = '1.7.10'
-    ext.sdk_version = '15.5.3'
+    ext.sdk_version = '16.0.0'
     repositories {
         google()
         mavenCentral()
@@ -17,6 +17,7 @@ buildscript {
 
 rootProject.allprojects {
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
@@ -51,4 +52,7 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
+
+    //NOTE: This is used when building with MavenLocal.
+    //implementation "com.github.Bluedot-Innovation:pointsdk:1262"
 }

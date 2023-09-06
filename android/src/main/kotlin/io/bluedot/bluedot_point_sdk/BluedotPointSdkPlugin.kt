@@ -27,12 +27,14 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     @JvmStatic lateinit var geoTriggeringChannel: MethodChannel
     @JvmStatic lateinit var tempoChannel: MethodChannel
     @JvmStatic lateinit var bluedotServiceChannel: MethodChannel
+    @JvmStatic lateinit var methodChannelGeoUtils: MethodChannel
   }
 
   private val FLUTTER_PLUGIN_CHANNEL= "bluedot_point_flutter/bluedot_point_sdk"
   private val GEO_TRIGGERING_CHANNEL = "bluedot_point_flutter/geo_triggering_events"
   private val TEMPO_CHANNEL = "bluedot_point_flutter/tempo_events"
   private val BLUEDOT_SERVICE_CHANNEL = "bluedot_point_flutter/bluedot_service_events"
+  private val GEO_TRIGGERING_UTILS_CHANNEL = "bluedot_point_flutter/geo_triggering_utils"
 
   private lateinit var channel: MethodChannel
   private lateinit var serviceManager: ServiceManager
@@ -43,6 +45,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, FLUTTER_PLUGIN_CHANNEL)
     channel.setMethodCallHandler(this)
     geoTriggeringChannel = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_CHANNEL)
+    methodChannelGeoUtils = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_UTILS_CHANNEL)
     tempoChannel = MethodChannel(flutterPluginBinding.binaryMessenger, TEMPO_CHANNEL)
     bluedotServiceChannel = MethodChannel(flutterPluginBinding.binaryMessenger, BLUEDOT_SERVICE_CHANNEL)
     context = flutterPluginBinding.applicationContext

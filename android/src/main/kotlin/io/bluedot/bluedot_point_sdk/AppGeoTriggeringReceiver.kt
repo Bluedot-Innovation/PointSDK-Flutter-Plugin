@@ -1,66 +1,40 @@
 package io.bluedot.bluedot_point_sdk
 
 import android.content.Context
+import android.util.Log
 import au.com.bluedot.point.net.engine.*
-import kotlin.collections.ArrayList
+import au.com.bluedot.point.net.engine.event.*
+import io.flutter.plugin.common.MethodChannel.Result
 
 class AppGeoTriggeringReceiver : GeoTriggeringEventReceiver() {
 
-    override fun onZoneInfoUpdate(zones: List<ZoneInfo>, context: Context) {
-        val zoneList: ArrayList<Map<String, Any?>> = arrayListOf()
-        for (zoneInfo in zones) {
-            val customDataZone: MutableMap<String, Any?> = mutableMapOf()
-            val customDataMap = zoneInfo.getCustomData()
-            if (customDataMap != null) {
-                for (entry in customDataMap.keys) {
-                    customDataZone[entry] = customDataMap[entry]
-                }
-            }
-            val zone: Map<String, Any?> = mapOf("id" to zoneInfo.zoneId, "name" to zoneInfo.zoneName, "customData" to customDataZone)
-            zoneList.add(zone)
-        }
-        val map: Map<String, Any> = mapOf("zoneInfo" to zoneList)
-        sendEvent("onZoneInfoUpdate", map)
-    }
+  override fun onZoneInfoUpdate(context: Context) {
+    sendEvent("didUpdateZoneInfo", "", "")
+  }
 
-    override fun onZoneEntryEvent(entryEvent: ZoneEntryEvent, context: Context) {
-        val (id, name) = entryEvent.fenceInfo
-        val fenceDetails: Map<String, Any?> = mapOf("id" to id, "name" to name)
-        val zoneInfo = entryEvent.zoneInfo
-        val customDataZone: MutableMap<String, Any?> = mutableMapOf()
-        val customDataMap = zoneInfo.getCustomData()
-        if (customDataMap != null) {
-            for (entry in customDataMap.keys) {
-                customDataZone[entry] = customDataMap[entry]
-            }
-        }
-        val zoneDetails: Map<String, Any?> = mapOf("id" to zoneInfo.zoneId, "name" to zoneInfo.zoneName, "description" to zoneInfo.toString() ,"customData" to customDataZone)
-        val locationInfo = entryEvent.locationInfo
-        val locationDetails: Map<String, Any?> = mapOf("latitude" to locationInfo.latitude, "longitude" to locationInfo.longitude,
-                                                        "speed" to locationInfo.getSpeed(), "bearing" to locationInfo.getBearing(),
-                                                        "timeStamp" to locationInfo.timeStamp)
-        val map: Map<String, Any?> = mapOf("fenceInfo" to fenceDetails, "zoneInfo" to zoneDetails,
-                                            "locationInfo" to locationDetails, "isExitEnabled" to entryEvent.isExitEnabled)
-        sendEvent("didEnterZone", map)
-    }
+  override fun onZoneEntryEvent(entryEvent: GeoTriggerEvent, context: Context) {
+    sendEvent("didEnterZone", "GeoTriggerEvent", entryEvent.toJson())
+  }
 
-    override fun onZoneExitEvent(exitEvent: ZoneExitEvent, context: Context) {
-        val (id, name) = exitEvent.fenceInfo
-        val fenceDetails = mapOf("id" to id, "name" to name)
-        val zoneInfo = exitEvent.zoneInfo
-        val customDataZone: MutableMap<String, Any?> = mutableMapOf()
-        val customDataMap = zoneInfo.getCustomData()
-        if (customDataMap != null) {
-            for (entry in customDataMap.keys) {
-                customDataZone[entry] = customDataMap[entry]
-            }
-        }
-        val zoneDetails: Map<String, Any?> = mapOf("id" to zoneInfo.zoneId, "name" to zoneInfo.zoneName, "description" to zoneInfo.toString(),"customData" to customDataZone)
-        val map: Map<String, Any?> = mapOf("fenceInfo" to fenceDetails, "zoneInfo" to zoneDetails, "dwellTime" to exitEvent.dwellTime)
-        sendEvent("didExitZone", map)
-    }
+  override fun onZoneExitEvent(exitEvent: GeoTriggerEvent, context: Context) {
+    sendEvent("didExitZone", "GeoTriggerEvent", exitEvent.toJson())
+  }
 
-    private fun sendEvent(eventName: String, params: Map<String, Any?>) {
-        BluedotPointSdkPlugin.geoTriggeringChannel.invokeMethod(eventName, params)
-    }
+  // Use Dart to parse the json string and pass the resulting object to the
+  // client callback.
+  private fun sendEvent(eventName: String, modelName: String, jsonStr: String) {
+    BluedotPointSdkPlugin.methodChannelGeoUtils.invokeMethod("parseJson", listOf(modelName, jsonStr), object : Result {
+      override fun success(result: Any?) {
+        BluedotPointSdkPlugin.geoTriggeringChannel.invokeMethod(eventName, result)
+      }
+      override fun error(
+        errorCode: String, errorMessage: String?,
+        errorDetails: Any?
+      ) {
+        Log.e("AppGeoTriggeringRecv", "[sendEvent] failed")
+      }
+
+      override fun notImplemented() {}
+    })
+  }
 }
