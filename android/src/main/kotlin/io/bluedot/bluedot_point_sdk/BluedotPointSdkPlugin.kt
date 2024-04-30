@@ -73,6 +73,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       "getInstallRef" -> result.success(serviceManager.installRef)
       "getSDKVersion" -> result.success(serviceManager.sdkVersion)
       "getZonesAndFences" -> result.success(serviceManager.zonesAndFences)
+      "getCustomEventMetaData" -> result.success(serviceManager.getCustomEventMetaData())
       else -> {
         result.notImplemented()
       }

@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
@@ -100,7 +99,8 @@ class BluedotPointSdk {
 
   /// Disable or re-enable a specific zone by its [zoneId].
   Future<void> setZoneDisableByApplication(String zoneId, bool disable) {
-    return BluedotPointSdkPlatform.instance.setZoneDisableByApplication(zoneId, disable);
+    return BluedotPointSdkPlatform.instance
+        .setZoneDisableByApplication(zoneId, disable);
   }
 
   /// Returns the installation reference of this PointSDK enabled App.
@@ -122,6 +122,12 @@ class BluedotPointSdk {
   /// Zones created for this project in the Canvas portal.
   Future<dynamic> getZonesAndFences() {
     return BluedotPointSdkPlatform.instance.getZonesAndFences();
+  }
+
+  /// Returns a collection of `CustomEventMetaData` objects, corresponding to the
+  /// HashMap of Key Value Pairs <String, String>
+  Future<dynamic> getCustomEventMetaData() {
+    return BluedotPointSdkPlatform.instance.getCustomEventMetaData();
   }
 
   /// Reset Bluedot PointSDK (only if you wish to switch to a different projectId)
@@ -161,9 +167,9 @@ class BluedotPointSdk {
   /// setting `allowsBackgroundLocationUpdates` to `false`, as setting the value
   /// to `false` will prevent the app from accessing location from the background.
   void allowsBackgroundLocationUpdates(bool value) {
-    return BluedotPointSdkPlatform.instance.allowsBackgroundLocationUpdates(value);
+    return BluedotPointSdkPlatform.instance
+        .allowsBackgroundLocationUpdates(value);
   }
-
 }
 
 class GeoTriggeringEvents {
@@ -181,7 +187,9 @@ class BluedotServiceEvents {
   static const onBluedotServiceError = 'onBluedotServiceError';
 
   // iOS-only events
-  static const locationAuthorizationDidChange = 'locationAuthorizationDidChange';
+  static const locationAuthorizationDidChange =
+      'locationAuthorizationDidChange';
   static const lowPowerModeDidChange = 'lowPowerModeDidChange';
-  static const accuracyAuthorizationDidChange = 'accuracyAuthorizationDidChange';
+  static const accuracyAuthorizationDidChange =
+      'accuracyAuthorizationDidChange';
 }
