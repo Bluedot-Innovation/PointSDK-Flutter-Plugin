@@ -29,6 +29,7 @@ apply plugin: 'kotlin-android'
 
 android {
 
+    namespace 'io.bluedot.bluedot_point_sdk'
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(17)
@@ -41,8 +42,7 @@ android {
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 31
-        compileSdkVersion 34
+        compileSdk 34
     }
 }
 
