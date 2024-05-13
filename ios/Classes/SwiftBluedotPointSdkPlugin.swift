@@ -76,6 +76,9 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         case "getZonesAndFences":
             let zonesAndFences = BDLocationManager.instance().zoneInfos
             result(zonesAndFences)
+        case "getCustomEventMetaData":
+            let customEventMetaData = BDLocationManager.instance().customEventMetaData()
+            result(customEventMetaData)
         case "allowsBackgroundLocationUpdates":
             allowsBackgroundLocationUpdates(call)
         default:
