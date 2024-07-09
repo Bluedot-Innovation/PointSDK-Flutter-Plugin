@@ -99,8 +99,8 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
     return resetSDK;
   }
 
-  void allowsBackgroundLocationUpdates(bool value) async {
-    await methodChannel.invokeMethod('allowsBackgroundLocationUpdates', {'value': value});
+  void backgroundLocationAccessForWhileUsing(bool value) async {
+    await methodChannel.invokeMethod('backgroundLocationAccessForWhileUsing', {'value': value});
   }
 
 }

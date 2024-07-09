@@ -79,8 +79,8 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         case "getCustomEventMetaData":
             let customEventMetaData = BDLocationManager.instance().customEventMetaData()
             result(customEventMetaData)
-        case "allowsBackgroundLocationUpdates":
-            allowsBackgroundLocationUpdates(call)
+        case "backgroundLocationAccessForWhileUsing":
+            backgroundLocationAccessForWhileUsing(call)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -165,9 +165,9 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func allowsBackgroundLocationUpdates(_ call: FlutterMethodCall) {
+    private func backgroundLocationAccessForWhileUsing(_ call: FlutterMethodCall) {
         if let args = call.arguments as? [String: Any], let value = args["value"] as? Bool {
-            BDLocationManager.instance().allowsBackgroundLocationUpdates = value
+            BDLocationManager.instance().backgroundLocationAccessForWhileUsing = value
         }
     }
     
