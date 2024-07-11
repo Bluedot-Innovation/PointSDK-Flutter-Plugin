@@ -153,23 +153,24 @@ class BluedotPointSdk {
   /// Enable or disable background location updates (iOS only)
   ///
   /// For the background location usage indicator to work,
-  /// `allowsBackgroundLocationUpdates` must be set to `true` while the app is in
+  /// `backgroundLocationAccessForWhileUsing` must be set to `true` while the app is in
   /// the foreground, and the app has `While using` location authorization.
-  /// If `allowsBackgroundLocationUpdates` is set to `true` while the app is in
+  /// If `backgroundLocationAccessForWhileUsing` is set to `true` while the app is in
   /// the background, or the user changes the location permission to `While using`
   /// while the app is in the background, the background location usage
   /// indicator will not be enabled.
   ///
-  /// The default value of `allowsBackgroundLocationUpdates` is `false`, and it
+  /// The default value of `backgroundLocationAccessForWhileUsing` is `false`, and it
   /// can be disabled while the app is either in the foreground or background.
   /// If the application requests `Always` location authorization, be sure to
   /// check that `Always` location authorization has not been granted before
-  /// setting `allowsBackgroundLocationUpdates` to `false`, as setting the value
+  /// setting `backgroundLocationAccessForWhileUsing` to `false`, as setting the value
   /// to `false` will prevent the app from accessing location from the background.
-  void allowsBackgroundLocationUpdates(bool value) {
+  void backgroundLocationAccessForWhileUsing(bool value) {
     return BluedotPointSdkPlatform.instance
-        .allowsBackgroundLocationUpdates(value);
+        .backgroundLocationAccessForWhileUsing(value);
   }
+
 }
 
 class GeoTriggeringEvents {
