@@ -21,6 +21,13 @@ class GeoTriggeringBuilder {
     return this;
   }
 
+  /// Set parameters for iOS Restart notification.
+  GeoTriggeringBuilder iosNotification(String? iosAppRestartNotificationTitle, String? iosAppRestartNotificationButtonText) {
+    this.iosAppRestartNotificationTitle = iosAppRestartNotificationTitle;
+    this.iosAppRestartNotificationButtonText = iosAppRestartNotificationButtonText;
+    return this;
+  }
+
   /// Start GeoTriggering features of the Bluedot Point SDK
   ///
   /// You can start Geo-triggering feature __only__ while your App is in the Foreground.
