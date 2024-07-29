@@ -102,7 +102,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
     }
     
     private func startGeoTriggering(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        if let args = call.arguments as? [String: Any], let title = args["title"] as? String, let content = args["content"] as? String {
+        if let args = call.arguments as? [String: Any], let title = args["notificationTitle"] as? String, let content = args["notificationButtonText"] as? String {
             BDLocationManager.instance().startGeoTriggering(withAppRestartNotificationTitle: title, notificationButtonText: content) { error in
                 self.handleError(error, result)
             }
