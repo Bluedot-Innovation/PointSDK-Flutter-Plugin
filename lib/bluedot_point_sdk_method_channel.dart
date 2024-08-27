@@ -89,13 +89,18 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
     return getZonesAndFences;
   }
 
+  Future<dynamic> getCustomEventMetaData() async {
+      final getCustomEventMetaData = await methodChannel.invokeMethod('getCustomEventMetaData');
+      return getCustomEventMetaData;
+  }
+
   Future<void> reset() async {
     final resetSDK = await methodChannel.invokeMethod('reset');
     return resetSDK;
   }
 
-  void allowsBackgroundLocationUpdates(bool value) async {
-    await methodChannel.invokeMethod('allowsBackgroundLocationUpdates', {'value': value});
+  void backgroundLocationAccessForWhileUsing(bool value) async {
+    await methodChannel.invokeMethod('backgroundLocationAccessForWhileUsing', {'value': value});
   }
 
 }

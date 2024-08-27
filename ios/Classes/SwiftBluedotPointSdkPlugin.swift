@@ -76,8 +76,11 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         case "getZonesAndFences":
             let zonesAndFences = BDLocationManager.instance().zoneInfos
             result(zonesAndFences)
-        case "allowsBackgroundLocationUpdates":
-            allowsBackgroundLocationUpdates(call)
+        case "getCustomEventMetaData":
+            let customEventMetaData = BDLocationManager.instance().customEventMetaData()
+            result(customEventMetaData)
+        case "backgroundLocationAccessForWhileUsing":
+            backgroundLocationAccessForWhileUsing(call)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -99,7 +102,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
     }
     
     private func startGeoTriggering(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
-        if let args = call.arguments as? [String: Any], let title = args["title"] as? String, let content = args["content"] as? String {
+        if let args = call.arguments as? [String: Any], let title = args["notificationTitle"] as? String, let content = args["notificationButtonText"] as? String {
             BDLocationManager.instance().startGeoTriggering(withAppRestartNotificationTitle: title, notificationButtonText: content) { error in
                 self.handleError(error, result)
             }
@@ -162,9 +165,9 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    private func allowsBackgroundLocationUpdates(_ call: FlutterMethodCall) {
+    private func backgroundLocationAccessForWhileUsing(_ call: FlutterMethodCall) {
         if let args = call.arguments as? [String: Any], let value = args["value"] as? Bool {
-            BDLocationManager.instance().allowsBackgroundLocationUpdates = value
+            BDLocationManager.instance().backgroundLocationAccessForWhileUsing = value
         }
     }
     

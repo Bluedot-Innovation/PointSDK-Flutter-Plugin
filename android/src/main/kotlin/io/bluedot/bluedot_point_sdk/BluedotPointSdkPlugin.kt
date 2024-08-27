@@ -9,6 +9,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import au.com.bluedot.point.CustomEventMetaDataSetError
 import au.com.bluedot.point.net.engine.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -59,7 +60,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
       "isInitialized" -> result.success(serviceManager.isBluedotServiceInitialized)
-      "isGeoTriggeringRunning" -> result.success(GeoTriggeringService.isRunning())
+      "isGeoTriggeringRunning" -> result.success(GeoTriggeringService.isRunning(context))
       "isTempoRunning" -> result.success(TempoService.isRunning(context))
       "initialize" -> initialize(call, result)
       "androidStartGeoTriggering" -> startGeoTriggering(call, result)
@@ -73,6 +74,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       "getInstallRef" -> result.success(serviceManager.installRef)
       "getSDKVersion" -> result.success(serviceManager.sdkVersion)
       "getZonesAndFences" -> result.success(serviceManager.zonesAndFences)
+      "getCustomEventMetaData" -> result.success(serviceManager.getCustomEventMetaData())
       else -> {
         result.notImplemented()
       }
@@ -188,7 +190,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       serviceManager.setCustomEventMetaData(metadata)
       result.success(null)
     } catch (err: Error) {
-      result.error(BDError.ERROR_CODE_CUSTOM_METADATA_NOT_SET.toString(), err.message, err.toString())
+      result.error(CustomEventMetaDataSetError().errorCode.toString(), err.message, err.toString())
     }
   }
 

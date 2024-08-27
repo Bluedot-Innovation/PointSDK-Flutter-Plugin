@@ -18,7 +18,8 @@ class AppTempoReceiver : TempoTrackingReceiver() {
      */
 
     override fun tempoStoppedWithError(error: BDError, context: Context) {
-        val arguments: Map<String, String> = mapOf("code" to error.errorCode.toString(), "message" to error.reason, "details" to error.toString())
+        val arguments: Map<String, String> =
+            mapOf("code" to error.errorCode.toString(), "message" to error.reason.toString(), "details" to error.toString())
         sendEvent("tempoTrackingStoppedWithError", arguments)
     }
 

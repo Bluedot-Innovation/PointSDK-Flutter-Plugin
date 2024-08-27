@@ -2,15 +2,15 @@ group 'io.bluedot.bluedot_point_sdk'
 version '2.0.0'
 
 buildscript {
-    ext.kotlin_version = '1.7.10'
-    ext.sdk_version = '16.0.0'
+    ext.kotlin_version = '1.8.10'
+    ext.sdk_version = '16.1.0'
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.2'
+        classpath 'com.android.tools.build:gradle:8.2.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -29,13 +29,11 @@ apply plugin: 'kotlin-android'
 
 android {
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    kotlinOptions {
-        jvmTarget = '1.8'
+    namespace 'io.bluedot.bluedot_point_sdk'
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
     }
 
     sourceSets {
@@ -43,14 +41,12 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 31
-        compileSdkVersion 31
+        minSdk 19
+        compileSdk 34
     }
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
 
     //NOTE: This is used when building with MavenLocal.
