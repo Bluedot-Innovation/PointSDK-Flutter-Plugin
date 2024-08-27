@@ -1,7 +1,7 @@
 # Flutter Bluedot Point SDK Plugin release notes
 
 ## 2.0.0
-- Updated to latest PointSDK for both iOS and Android v16.0.0
+- Updated to latest PointSDK for both iOS v16.0.0 and Android v16.1.0
 
 ## 1.0.1
 - Updated to latest iOS PointSDK 15.6.7 and Android PointSDK 15.5.3
