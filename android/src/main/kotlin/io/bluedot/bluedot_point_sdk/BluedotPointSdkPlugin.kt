@@ -8,53 +8,101 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import au.com.bluedot.point.CustomEventMetaDataSetError
 import au.com.bluedot.point.net.engine.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.FlutterJNI
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
 /** BluedotPointSdkPlugin */
-class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
+class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
 
   companion object {
-    @JvmStatic lateinit var geoTriggeringChannel: MethodChannel
-    @JvmStatic lateinit var tempoChannel: MethodChannel
-    @JvmStatic lateinit var bluedotServiceChannel: MethodChannel
-    @JvmStatic lateinit var methodChannelGeoUtils: MethodChannel
+    @JvmStatic  var geoTriggeringChannel: MethodChannel? = null
+    @JvmStatic  var tempoChannel: MethodChannel? = null
+    @JvmStatic  var bluedotServiceChannel: MethodChannel? = null
+    @JvmStatic  var methodChannelGeoUtils: MethodChannel? = null
+    @JvmStatic  var flutterJNI = FlutterJNI() // Create the Flutter JNI OBJ
   }
 
-  private val FLUTTER_PLUGIN_CHANNEL= "bluedot_point_flutter/bluedot_point_sdk"
+
   private val GEO_TRIGGERING_CHANNEL = "bluedot_point_flutter/geo_triggering_events"
   private val TEMPO_CHANNEL = "bluedot_point_flutter/tempo_events"
   private val BLUEDOT_SERVICE_CHANNEL = "bluedot_point_flutter/bluedot_service_events"
   private val GEO_TRIGGERING_UTILS_CHANNEL = "bluedot_point_flutter/geo_triggering_utils"
 
-  private lateinit var channel: MethodChannel
   private lateinit var serviceManager: ServiceManager
   private lateinit var context: Context
   private var notificationResourceId = 0
 
+  private fun initGeoTriggeringChannel(binaryMessenger: BinaryMessenger) {
+    geoTriggeringChannel = MethodChannel(binaryMessenger, GEO_TRIGGERING_CHANNEL)
+    geoTriggeringChannel?.setMethodCallHandler(this)
+  }
+
+  private fun initChannelGeoUtils(binaryMessenger: BinaryMessenger) {
+    methodChannelGeoUtils = MethodChannel(binaryMessenger, GEO_TRIGGERING_UTILS_CHANNEL)
+    methodChannelGeoUtils?.setMethodCallHandler(this)
+  }
+
+  private fun initTempoChannel(binaryMessenger: BinaryMessenger) {
+    tempoChannel = MethodChannel(binaryMessenger, TEMPO_CHANNEL)
+    tempoChannel?.setMethodCallHandler(this)
+  }
+
+  private fun initBluedotServiceChannel(binaryMessenger: BinaryMessenger) {
+    bluedotServiceChannel = MethodChannel(binaryMessenger, BLUEDOT_SERVICE_CHANNEL)
+    bluedotServiceChannel?.setMethodCallHandler(this)
+  }
+
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, FLUTTER_PLUGIN_CHANNEL)
-    channel.setMethodCallHandler(this)
-    geoTriggeringChannel = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_CHANNEL)
-    methodChannelGeoUtils = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_UTILS_CHANNEL)
-    tempoChannel = MethodChannel(flutterPluginBinding.binaryMessenger, TEMPO_CHANNEL)
-    bluedotServiceChannel = MethodChannel(flutterPluginBinding.binaryMessenger, BLUEDOT_SERVICE_CHANNEL)
+    Log.i("ABCD","onAttachedToEngine FlutterJNI");
+    flutterBinding = flutterPluginBinding
+    if (geoTriggeringChannel == null) {
+      initGeoTriggeringChannel(flutterPluginBinding.binaryMessenger)
+    }
+
+    if (methodChannelGeoUtils == null) {
+      initChannelGeoUtils(flutterPluginBinding.binaryMessenger)
+    }
+
+    if (tempoChannel == null) {
+      initTempoChannel(flutterPluginBinding.binaryMessenger)
+    }
+
+    if (bluedotServiceChannel == null) {
+      initBluedotServiceChannel(flutterPluginBinding.binaryMessenger)
+    }
+    flutterJNI.attachToNative();
     context = flutterPluginBinding.applicationContext
     serviceManager = ServiceManager.getInstance(flutterPluginBinding.applicationContext)
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-    channel.setMethodCallHandler(null)
+    Log.i("ABCD","onDetachedFromEngine");
+    methodChannelGeoUtils?.setMethodCallHandler(null)
+    methodChannelGeoUtils = null
+
+    geoTriggeringChannel?..setMethodCallHandler(null)
+    geoTriggeringChannel = null
+
+    bluedotServiceChannel?.setMethodCallHandler(null)
+    bluedotServiceChannel = null
+
+    tempoChannel?.setMethodCallHandler(null)
+    tempoChannel = null
+    flutterJNI.detachFromNativeAndReleaseResources();
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
@@ -307,6 +355,44 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
         .setSmallIcon(iconResourceId)
       notification.build()
     }
+  }
+
+  override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    Log.i("ABCD","onAttachedToActivity");
+//    flutterBinding?.binaryMessenger?.let {
+//      // Reinitialize MethodChannel Forcefully from MainIsolate
+//      if(geoTriggeringChannel == null)
+//          initGeoTriggeringChannel(it)
+//      if(channelGeoUtils == null)
+//          initChannelGeoUtils(it)
+//      if(tempoChannel == null)
+//          initTempoChannel(it)
+//      if(bluedotServiceChannel == null)
+//         initBluedotServiceChannel(it)
+//      Log.i("ABCD","Reinit onAttachedToActivity");
+//    }
+  }
+
+  override fun onDetachedFromActivityForConfigChanges() {
+    Log.i("ABCD","onDetachedFromActivityForConfigChanges");
+  }
+
+  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    Log.i("ABCD","onReattachedToActivityForConfigChanges");
+  }
+
+  override fun onDetachedFromActivity() {
+    Log.i("ABCD","onDetachedFromActivity");
+//    methodChannelGeoUtils.setMethodCallHandler(null);
+//    methodChannelGeoUtils = null
+//    geoTriggeringChannel.setMethodCallHandler(null);
+//    geoTriggeringChannel = null;
+//    tempoChannel.setMethodCallHandler(null);
+//    tempoChannel = null
+//    bluedotServiceChannel.setMethodCallHandler(null);
+//    bluedotServiceChannel = null
+
+
   }
 
 }
