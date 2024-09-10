@@ -21,6 +21,6 @@ class BluedotErrorReceiver : BluedotServiceReceiver() {
     }
 
     private fun sendEvent(eventName: String, params: Map<String, Any?>) {
-        BluedotPointSdkPlugin.bluedotServiceChannel.invokeMethod(eventName, params)
+        BluedotPointSdkPlugin.bluedotServiceChannel?.invokeMethod(eventName, params)
     }
 }

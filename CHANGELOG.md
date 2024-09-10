@@ -1,4 +1,6 @@
 # Flutter Bluedot Point SDK Plugin release notes
+## 2.0.1
+- Added handling for multiple plugin initialization call(in case App implements `FirebaseMessaging` `onBackgroundMessage(..)` API 
 
 ## 2.0.0
 - Updated to latest PointSDK for both iOS v16.0.0 and Android v16.1.0
