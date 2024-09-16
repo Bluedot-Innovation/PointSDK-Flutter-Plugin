@@ -26,14 +26,14 @@ class AppGeoTriggeringReceiver : GeoTriggeringEventReceiver() {
 
     BluedotPointSdkPlugin.methodChannelGeoUtils?.invokeMethod("parseJson", listOf(modelName, jsonStr), object : Result {
       override fun success(result: Any?) {
-        Log.i("ABCD", "[AppGeoTriggeringReceiver.sendEvent] Success")
+        Log.i("ABCD", "AppGeoTriggeringReceiver sendEvent Success")
         BluedotPointSdkPlugin.geoTriggeringChannel?.invokeMethod(eventName, result)
       }
       override fun error(
         errorCode: String, errorMessage: String?,
         errorDetails: Any?
       ) {
-        Log.i("ABCD", "[AppGeoTriggeringReceiver.sendEvent] Error")
+        Log.i("ABCD", "AppGeoTriggeringReceiver sendEvent Error")
         Log.e("AppGeoTriggeringRecv", "[sendEvent] failed")
       }
 

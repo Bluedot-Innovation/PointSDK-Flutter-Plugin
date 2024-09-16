@@ -36,7 +36,6 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
     @JvmStatic  var flutterJNI = FlutterJNI() // Create the Flutter JNI OBJ
   }
 
-
   private val GEO_TRIGGERING_CHANNEL = "bluedot_point_flutter/geo_triggering_events"
   private val TEMPO_CHANNEL = "bluedot_point_flutter/tempo_events"
   private val BLUEDOT_SERVICE_CHANNEL = "bluedot_point_flutter/bluedot_service_events"
