@@ -18,7 +18,7 @@ class BluedotPointSdkModels {
   // Parse passed in string as json and return resulting object.
   // Possible TODO: Add Models for each "model" type being passed in.
   Future<dynamic> parseJson(MethodCall call) {
-    print("ABCD [BluedotPointSdkModels.parseJson] called");
+    print("ABCD BluedotPointSdkModels parseJson");
     String model = call.arguments[0];
     String json = call.arguments[1];
     try {
