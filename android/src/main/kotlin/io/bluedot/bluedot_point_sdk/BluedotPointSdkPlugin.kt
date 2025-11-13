@@ -8,27 +8,30 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import au.com.bluedot.point.CustomEventMetaDataSetError
 import au.com.bluedot.point.net.engine.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
 /** BluedotPointSdkPlugin */
-class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
+class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
 
   companion object {
-    @JvmStatic lateinit var geoTriggeringChannel: MethodChannel
-    @JvmStatic lateinit var tempoChannel: MethodChannel
-    @JvmStatic lateinit var bluedotServiceChannel: MethodChannel
-    @JvmStatic lateinit var methodChannelGeoUtils: MethodChannel
+    @JvmStatic  var geoTriggeringChannel: MethodChannel? = null
+    @JvmStatic  var tempoChannel: MethodChannel? = null
+    @JvmStatic  var bluedotServiceChannel: MethodChannel? = null
+    @JvmStatic  var methodChannelGeoUtils: MethodChannel? = null
   }
 
   private val FLUTTER_PLUGIN_CHANNEL= "bluedot_point_flutter/bluedot_point_sdk"
@@ -37,24 +40,44 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   private val BLUEDOT_SERVICE_CHANNEL = "bluedot_point_flutter/bluedot_service_events"
   private val GEO_TRIGGERING_UTILS_CHANNEL = "bluedot_point_flutter/geo_triggering_utils"
 
-  private lateinit var channel: MethodChannel
+  private var channel: MethodChannel? = null
   private lateinit var serviceManager: ServiceManager
   private lateinit var context: Context
   private var notificationResourceId = 0
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, FLUTTER_PLUGIN_CHANNEL)
-    channel.setMethodCallHandler(this)
-    geoTriggeringChannel = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_CHANNEL)
-    methodChannelGeoUtils = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_UTILS_CHANNEL)
-    tempoChannel = MethodChannel(flutterPluginBinding.binaryMessenger, TEMPO_CHANNEL)
-    bluedotServiceChannel = MethodChannel(flutterPluginBinding.binaryMessenger, BLUEDOT_SERVICE_CHANNEL)
+    Log.d("BluedotPointSdkPlugin","onAttachedToEngine");
+    if (channel == null) {
+      Log.d("BluedotPointSdkPlugin","channel null case");
+      channel = MethodChannel(flutterPluginBinding.binaryMessenger, FLUTTER_PLUGIN_CHANNEL)
+      channel!!.setMethodCallHandler(this)
+    }
+
+    if (geoTriggeringChannel == null) {
+      geoTriggeringChannel =
+        MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_CHANNEL)
+    }
+
+    if (methodChannelGeoUtils == null) {
+      methodChannelGeoUtils =
+        MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_UTILS_CHANNEL)
+    }
+
+    if (tempoChannel == null) {
+      tempoChannel = MethodChannel(flutterPluginBinding.binaryMessenger, TEMPO_CHANNEL)
+    }
+
+    if (bluedotServiceChannel == null) {
+      bluedotServiceChannel =
+        MethodChannel(flutterPluginBinding.binaryMessenger, BLUEDOT_SERVICE_CHANNEL)
+    }
     context = flutterPluginBinding.applicationContext
     serviceManager = ServiceManager.getInstance(flutterPluginBinding.applicationContext)
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-    channel.setMethodCallHandler(null)
+    channel?.setMethodCallHandler(null)
+    channel = null
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
@@ -307,6 +330,22 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
         .setSmallIcon(iconResourceId)
       notification.build()
     }
+  }
+
+  override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    Log.d("BluedotPointSdkPlugin","onAttachedToActivity");
+  }
+
+  override fun onDetachedFromActivityForConfigChanges() {
+    Log.d("BluedotPointSdkPlugin","onDetachedFromActivityForConfigChanges");
+  }
+
+  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    Log.d("BluedotPointSdkPlugin","onReattachedToActivityForConfigChanges");
+  }
+
+  override fun onDetachedFromActivity() {
+    Log.d("BluedotPointSdkPlugin","onDetachedFromActivity");
   }
 
 }

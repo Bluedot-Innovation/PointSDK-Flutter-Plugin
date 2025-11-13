@@ -23,9 +23,9 @@ class AppGeoTriggeringReceiver : GeoTriggeringEventReceiver() {
   // Use Dart to parse the json string and pass the resulting object to the
   // client callback.
   private fun sendEvent(eventName: String, modelName: String, jsonStr: String) {
-    BluedotPointSdkPlugin.methodChannelGeoUtils.invokeMethod("parseJson", listOf(modelName, jsonStr), object : Result {
+    BluedotPointSdkPlugin.methodChannelGeoUtils?.invokeMethod("parseJson", listOf(modelName, jsonStr), object : Result {
       override fun success(result: Any?) {
-        BluedotPointSdkPlugin.geoTriggeringChannel.invokeMethod(eventName, result)
+        BluedotPointSdkPlugin.geoTriggeringChannel?.invokeMethod(eventName, result)
       }
       override fun error(
         errorCode: String, errorMessage: String?,
