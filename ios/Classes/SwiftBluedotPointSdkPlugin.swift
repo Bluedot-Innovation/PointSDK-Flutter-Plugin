@@ -74,8 +74,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
             let sdkVersion = BDLocationManager.instance().sdkVersion()
             result(sdkVersion)
         case "getZonesAndFences":
-            let zonesAndFences = BDLocationManager.instance().zoneInfos
-            result(zonesAndFences)
+            getZonesAndFences(result)
         case "getCustomEventMetaData":
             let customEventMetaData = BDLocationManager.instance().customEventMetaData()
             result(customEventMetaData)
@@ -165,6 +164,44 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
+    private func getZonesAndFences(_ result: @escaping FlutterResult) {
+        if let zoneInfos = BDLocationManager.instance().zoneInfos {
+            
+            var zonesArray: [[String: Any]] = []
+            
+            for zone in zoneInfos {
+                
+                var zoneDict: [String: Any] = [:]
+                zoneDict["ID"] = zone.id
+                zoneDict["name"] = zone.name
+                zoneDict["customData"] = zone.customData
+                
+                if let destination = zone.destination {
+                    var destinationDict: [String: Any] = [:]
+                    destinationDict["destinationId"] = destination.destinationId
+
+                    var locationDict: [String: Any] = [:]
+                    locationDict["latitude"] = destination.location.latitude
+                    locationDict["longitude"] = destination.location.longitude
+                    destinationDict["location"] = locationDict
+
+                    if let name = destination.name {
+                        destinationDict["name"] = name
+                    }
+                    if let customData = destination.customData {
+                        destinationDict["customData"] = customData
+                    }
+                
+                    zoneDict["destination"] = destinationDict
+                }
+                
+                zonesArray.append(zoneDict)
+            }
+            
+            result(zonesArray)
+        }
+    }
+
     private func backgroundLocationAccessForWhileUsing(_ call: FlutterMethodCall) {
         if let args = call.arguments as? [String: Any], let value = args["value"] as? Bool {
             BDLocationManager.instance().backgroundLocationAccessForWhileUsing = value
