@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import au.com.bluedot.point.CustomEventMetaDataSetError
 import au.com.bluedot.point.net.engine.*
+import au.com.bluedot.point.net.engine.ZoneInfo
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -85,7 +86,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       "reset" -> reset(result)
       "getInstallRef" -> result.success(serviceManager.installRef)
       "getSDKVersion" -> result.success(serviceManager.sdkVersion)
-      "getZonesAndFences" -> result.success(serviceManager.zonesAndFences)
+      "getZonesAndFences" -> getZonesAndFences(serviceManager.zonesAndFences, result)
       "getCustomEventMetaData" -> result.success(serviceManager.getCustomEventMetaData())
       else -> {
         result.notImplemented()
@@ -256,6 +257,73 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       handleError(error, result)
     }
     serviceManager.reset(resetResultReceiver)
+  }
+
+  fun ZoneInfo.toJson(): Map<String, Any?> {
+    val map = mutableMapOf<String, Any?>(
+      "zoneId" to zoneId,
+      "zoneName" to zoneName,
+      "customData" to customData
+    )
+    destination?.let {
+      map["destination"] = mapOf(
+        "destinationId" to it.destinationId,
+        "name" to it.name,
+        "address" to it.address,
+        "location" to mapOf(
+          "latitude" to it.location.latitude,
+          "longitude" to it.location.longitude
+        ),
+        "customData" to it.customData
+      )
+    }
+    return map
+  }
+
+  private fun getZonesAndFences(
+    zoneInfos: ArrayList<ZoneInfo>?,
+    result: Result
+  ) {
+//        var zonesArray: Array<String, Any> = []
+//
+//        for zone in zoneInfos {
+//
+//          var zoneDict: Array<String, Any> = []
+//          zoneDict["zoneId"] = zone.zoneId
+//          zoneDict["zoneName"] = zone.zoneName
+//          zoneDict["customData"] = zone.customData
+//
+//          if (zone.destination != null) {
+//            val destination: Destination = zone.destination
+//
+//            var destinationDict: Array<String, Any>
+//            destinationDict["destinationId"] = destination.destinationId
+//            destinationDict["name"] = destination.name
+//            destinationDict["address"] = destination.address
+//
+//            var locationDict: HashMap<String, Double> = [:]
+//            locationDict["latitude"] = destination.location.latitude
+//            locationDict["longitude"] = destination.location.longitude
+//            destinationDict["location"] = locationDict
+//
+//            zoneDict["destination"]
+//            if let name = destination.name {
+//              destinationDict["name"] = name
+//            }
+//            if let customData = destination.customData {
+//              destinationDict["customData"] = customData
+//            }
+//
+//            zoneDict["destination"] = destinationDict
+//          }
+//
+//          zonesArray.append(zoneDict)
+//        }
+
+    var resultMap = zoneInfos?.map { zoneInfo ->
+      zoneInfo.toJson()
+    } ?: emptyList<Map<String, Any?>>() }
+    result.success(resultMap)
   }
 
   private fun handleError(error: BDError?, result: Result) {
