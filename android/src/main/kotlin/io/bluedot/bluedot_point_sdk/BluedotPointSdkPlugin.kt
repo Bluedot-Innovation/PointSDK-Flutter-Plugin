@@ -262,8 +262,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   fun ZoneInfo.toJson(): Map<String, Any?> {
     val map = mutableMapOf<String, Any?>(
       "zoneId" to zoneId,
-      "zoneName" to zoneName,
-      "customData" to customData
+      "zoneName" to zoneName
     )
     destination?.let {
       map["destination"] = mapOf(
@@ -271,8 +270,8 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
         "name" to it.name,
         "address" to it.address,
         "location" to mapOf(
-          "latitude" to it.location.latitude,
-          "longitude" to it.location.longitude
+          "latitude" to it.location?.latitude,
+          "longitude" to it.location?.longitude
         ),
         "customData" to it.customData
       )
@@ -284,45 +283,10 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     zoneInfos: ArrayList<ZoneInfo>?,
     result: Result
   ) {
-//        var zonesArray: Array<String, Any> = []
-//
-//        for zone in zoneInfos {
-//
-//          var zoneDict: Array<String, Any> = []
-//          zoneDict["zoneId"] = zone.zoneId
-//          zoneDict["zoneName"] = zone.zoneName
-//          zoneDict["customData"] = zone.customData
-//
-//          if (zone.destination != null) {
-//            val destination: Destination = zone.destination
-//
-//            var destinationDict: Array<String, Any>
-//            destinationDict["destinationId"] = destination.destinationId
-//            destinationDict["name"] = destination.name
-//            destinationDict["address"] = destination.address
-//
-//            var locationDict: HashMap<String, Double> = [:]
-//            locationDict["latitude"] = destination.location.latitude
-//            locationDict["longitude"] = destination.location.longitude
-//            destinationDict["location"] = locationDict
-//
-//            zoneDict["destination"]
-//            if let name = destination.name {
-//              destinationDict["name"] = name
-//            }
-//            if let customData = destination.customData {
-//              destinationDict["customData"] = customData
-//            }
-//
-//            zoneDict["destination"] = destinationDict
-//          }
-//
-//          zonesArray.append(zoneDict)
-//        }
-
-    var resultMap = zoneInfos?.map { zoneInfo ->
-      zoneInfo.toJson()
-    } ?: emptyList<Map<String, Any?>>() }
+    val resultMap: ArrayList<Map<String, Any?>> = arrayListOf()
+    zoneInfos?.forEach { zoneInfo ->
+      resultMap.add(zoneInfo.toJson())
+    }
     result.success(resultMap)
   }
 
