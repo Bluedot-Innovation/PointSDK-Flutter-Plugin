@@ -11,6 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import au.com.bluedot.point.CustomEventMetaDataSetError
 import au.com.bluedot.point.net.engine.*
+import au.com.bluedot.point.net.engine.ZoneInfo
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -25,10 +26,10 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
 
   companion object {
-    @JvmStatic lateinit var geoTriggeringChannel: MethodChannel
-    @JvmStatic lateinit var tempoChannel: MethodChannel
-    @JvmStatic lateinit var bluedotServiceChannel: MethodChannel
-    @JvmStatic lateinit var methodChannelGeoUtils: MethodChannel
+    @JvmStatic var geoTriggeringChannel: MethodChannel? = null
+    @JvmStatic var tempoChannel: MethodChannel? = null
+    @JvmStatic var bluedotServiceChannel: MethodChannel? = null
+    @JvmStatic var methodChannelGeoUtils: MethodChannel? = null
   }
 
   private val FLUTTER_PLUGIN_CHANNEL= "bluedot_point_flutter/bluedot_point_sdk"
@@ -37,24 +38,36 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   private val BLUEDOT_SERVICE_CHANNEL = "bluedot_point_flutter/bluedot_service_events"
   private val GEO_TRIGGERING_UTILS_CHANNEL = "bluedot_point_flutter/geo_triggering_utils"
 
-  private lateinit var channel: MethodChannel
+  private var channel: MethodChannel? = null
   private lateinit var serviceManager: ServiceManager
   private lateinit var context: Context
   private var notificationResourceId = 0
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    channel = MethodChannel(flutterPluginBinding.binaryMessenger, FLUTTER_PLUGIN_CHANNEL)
-    channel.setMethodCallHandler(this)
-    geoTriggeringChannel = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_CHANNEL)
-    methodChannelGeoUtils = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_UTILS_CHANNEL)
-    tempoChannel = MethodChannel(flutterPluginBinding.binaryMessenger, TEMPO_CHANNEL)
-    bluedotServiceChannel = MethodChannel(flutterPluginBinding.binaryMessenger, BLUEDOT_SERVICE_CHANNEL)
+    if (channel == null) {
+      channel = MethodChannel(flutterPluginBinding.binaryMessenger, FLUTTER_PLUGIN_CHANNEL)
+      channel!!.setMethodCallHandler(this)
+    }
+
+    if (geoTriggeringChannel == null)
+       geoTriggeringChannel = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_CHANNEL)
+
+    if (methodChannelGeoUtils == null)
+       methodChannelGeoUtils = MethodChannel(flutterPluginBinding.binaryMessenger, GEO_TRIGGERING_UTILS_CHANNEL)
+
+    if (tempoChannel == null)
+       tempoChannel = MethodChannel(flutterPluginBinding.binaryMessenger, TEMPO_CHANNEL)
+
+    if (bluedotServiceChannel == null)
+        bluedotServiceChannel = MethodChannel(flutterPluginBinding.binaryMessenger, BLUEDOT_SERVICE_CHANNEL)
+
     context = flutterPluginBinding.applicationContext
     serviceManager = ServiceManager.getInstance(flutterPluginBinding.applicationContext)
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-    channel.setMethodCallHandler(null)
+    channel?.setMethodCallHandler(null)
+    channel = null
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
@@ -73,7 +86,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       "reset" -> reset(result)
       "getInstallRef" -> result.success(serviceManager.installRef)
       "getSDKVersion" -> result.success(serviceManager.sdkVersion)
-      "getZonesAndFences" -> result.success(serviceManager.zonesAndFences)
+      "getZonesAndFences" -> getZonesAndFences(serviceManager.zonesAndFences, result)
       "getCustomEventMetaData" -> result.success(serviceManager.getCustomEventMetaData())
       else -> {
         result.notImplemented()
@@ -244,6 +257,37 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       handleError(error, result)
     }
     serviceManager.reset(resetResultReceiver)
+  }
+
+  fun ZoneInfo.toJson(): Map<String, Any?> {
+    val map = mutableMapOf<String, Any?>(
+      "zoneId" to zoneId,
+      "zoneName" to zoneName
+    )
+    destination?.let {
+      map["destination"] = mapOf(
+        "destinationId" to it.destinationId,
+        "name" to it.name,
+        "address" to it.address,
+        "location" to mapOf(
+          "latitude" to it.location?.latitude,
+          "longitude" to it.location?.longitude
+        ),
+        "customData" to it.customData
+      )
+    }
+    return map
+  }
+
+  private fun getZonesAndFences(
+    zoneInfos: ArrayList<ZoneInfo>?,
+    result: Result
+  ) {
+    val resultMap: ArrayList<Map<String, Any?>> = arrayListOf()
+    zoneInfos?.forEach { zoneInfo ->
+      resultMap.add(zoneInfo.toJson())
+    }
+    result.success(resultMap)
   }
 
   private fun handleError(error: BDError?, result: Result) {

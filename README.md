@@ -11,7 +11,7 @@ Functionality is provided through one single package so you can use it for both 
 ## Current Support
 
 - Android API 21+
-- iOS 12.0+
+- iOS 15.0+
 - Flutter >=2.5.0
 
 ## Questions
