@@ -246,7 +246,7 @@ extension SwiftBluedotPointSdkPlugin: BDPGeoTriggeringEventDelegate {
         sendEvent(eventName: "didExitZone", modelName: "GeoTriggerEvent", jsonStr: json)
     }
 
-    public func didDwellInZone(_ dwellEvent: GeoTriggerEvent) {
+    public func didDwell(inZone dwellEvent: GeoTriggerEvent) {
         let json = (try? dwellEvent.toJson() as String?) ?? ""
         sendEvent(eventName: "didDwellInZone", modelName: "GeoTriggerEvent", jsonStr: json)
     }
