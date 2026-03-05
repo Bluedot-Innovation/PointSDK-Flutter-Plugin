@@ -177,7 +177,7 @@ class GeoTriggeringEvents {
   static const didUpdateZoneInfo = 'didUpdateZoneInfo';
   static const didEnterZone = 'didEnterZone';
   static const didExitZone = 'didExitZone';
-  static const didDwellZone = 'didDwellZone';
+  static const didDwellZone = 'didDwellInZone';
 }
 
 class TempoEvents {
