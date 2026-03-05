@@ -1,4 +1,8 @@
 # Flutter Bluedot Point SDK Plugin release notes
+
+## 2.1.1
+- Updated to Android Point SDK v17.4.1 and iOS Point SDK v17.1.0
+
 ## 2.1.0
 - Updated to Android Point SDK v17.3.0 and iOS Point SDK v17.1.0
 - Fix added to reinit channels if it is null instead of crashing the App
