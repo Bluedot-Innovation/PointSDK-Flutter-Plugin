@@ -251,7 +251,7 @@ extension SwiftBluedotPointSdkPlugin: BDPGeoTriggeringEventDelegate {
         sendEvent(eventName: "didDwellInZone", modelName: "GeoTriggerEvent", jsonStr: json)
     }
 
-   // Use Dart to parse the json string and pass the resulting object to the
+    // Use Dart to parse the json string and pass the resulting object to the
     // client callback.
     private func sendEvent(eventName: String, modelName: String, jsonStr: String) -> Any {
         self.geoTriggeringUtilsChannel?.invokeMethod(
