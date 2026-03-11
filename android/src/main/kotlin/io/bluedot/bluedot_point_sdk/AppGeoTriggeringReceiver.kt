@@ -20,6 +20,10 @@ class AppGeoTriggeringReceiver : GeoTriggeringEventReceiver() {
     sendEvent("didExitZone", "GeoTriggerEvent", exitEvent.toJson())
   }
 
+  override fun onZoneDwellEvent(dwellEvent: GeoTriggerEvent, context: Context) {
+    sendEvent("didDwellInZone", "GeoTriggerEvent", dwellEvent.toJson())
+  }
+
   // Use Dart to parse the json string and pass the resulting object to the
   // client callback.
   private fun sendEvent(eventName: String, modelName: String, jsonStr: String) {
