@@ -1,7 +1,3 @@
-import 'dart:convert';
-
-import 'package:flutter/services.dart';
-
 import 'bluedot_point_sdk_models.dart';
 import 'bluedot_point_sdk_platform_interface.dart';
 import 'tempo_builder.dart';
