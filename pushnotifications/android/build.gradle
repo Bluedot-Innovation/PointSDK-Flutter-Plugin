@@ -1,5 +1,7 @@
-group 'io.bluedot.bluedot_point_sdk'
-version '2.1.2'
+package pushnotifications.android
+
+group 'io.bluedot.bluedot_point_sdk_push'
+version '1.0.0'
 
 buildscript {
     ext.kotlin_version = '2.3.0'
@@ -28,8 +30,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-
-    namespace 'io.bluedot.bluedot_point_sdk'
+    namespace 'io.bluedot.bluedot_point_sdk_push'
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(21)
@@ -47,8 +48,13 @@ android {
 }
 
 dependencies {
+    // Core Point SDK — must match the version used by the base plugin.
     implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
 
-    //NOTE: This is used when building with MavenLocal.
-    //implementation "com.github.Bluedot-Innovation:pointsdk:1262"
+    // Push notifications module and its Firebase dependency.
+    // These are the ONLY place in the plugin ecosystem where these artifacts are declared,
+    // so they are only resolved for apps that add bluedot_point_sdk_push.
+    implementation "com.gitlab.bluedotio.android:pushnotifications:$sdk_version"
+    implementation 'com.google.firebase:firebase-messaging:25.0.1'
 }
+

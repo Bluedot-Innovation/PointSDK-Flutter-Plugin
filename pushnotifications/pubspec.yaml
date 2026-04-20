@@ -1,0 +1,30 @@
+name: bluedot_point_sdk_push
+description: >
+  Optional push notifications module for the Bluedot Point SDK Flutter plugin.
+  Adds Firebase Cloud Messaging support via the Bluedot pushnotifications module.
+  Android only.
+version: 2.1.1
+homepage: "https://bluedot.io"
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  bluedot_point_sdk:
+    # Use path during local/monorepo development.
+    # Replace with a pub.dev version constraint when publishing:
+    #   bluedot_point_sdk: ^2.0.0
+    path: ../
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: io.bluedot.bluedot_point_sdk_push
+        pluginClass: BluedotPushPlugin
+      ios:
+        pluginClass: BluedotPointSdkPushPlugin
+

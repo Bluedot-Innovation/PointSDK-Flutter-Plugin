@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!--
+            AppPushNotificationsReceiver is automatically merged into the app's manifest.
+            No manual AndroidManifest.xml editing required in the consuming app.
+        -->
+        <receiver
+            android:name="io.bluedot.bluedot_point_sdk_push.AppPushNotificationsReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="io.bluedot.point.PUSHNOTIFICATIONS" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
+
