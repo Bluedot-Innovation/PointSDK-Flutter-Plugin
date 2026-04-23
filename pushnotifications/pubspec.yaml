@@ -19,7 +19,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: io.bluedot.bluedot_point_sdk_push
+        package: io.bluedot.pushnotifications
         pluginClass: BluedotPushPlugin
       ios:
         pluginClass: BluedotPointSdkPushPlugin

@@ -1,5 +1,3 @@
-package pushnotifications.android
-
 group 'io.bluedot.bluedot_point_sdk_push'
 version '1.0.0'
 
@@ -17,12 +15,38 @@ buildscript {
     }
 }
 
+// Load local.properties from the consumer app's root project (the standard
+// Flutter/Android location) so that gitlabPipelineId / gitlabMavenToken set
+// there are visible to this plugin's build script.
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader -> localProperties.load(reader) }
+}
+
+def gitlabPipelineId = localProperties.getProperty('gitlabPipelineId') ?:
+        rootProject.findProperty('gitlabPipelineId') ?: project.findProperty('gitlabPipelineId') ?: ''
+def gitlabMavenToken = localProperties.getProperty('gitlabMavenToken') ?:
+        rootProject.findProperty('gitlabMavenToken') ?: project.findProperty('gitlabMavenToken') ?: ''
+
 rootProject.allprojects {
     repositories {
         mavenLocal()
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        if (gitlabPipelineId) {
+            maven {
+                url 'https://gitlab.com/api/v4/projects/14682665/packages/maven'
+                credentials(HttpHeaderCredentials) {
+                    name  'Private-Token'
+                    value gitlabMavenToken
+                }
+                authentication {
+                    header(HttpHeaderAuthentication)
+                }
+            }
+        }
     }
 }
 
@@ -53,8 +77,8 @@ if (gitlabPipelineId) {
     pushSdkDependency  = "au.com.bluedot:pushnotifications:${gitlabPipelineId}"
     pointSdkDependency = "au.com.bluedot:pointsdk:${gitlabPipelineId}"
 } else {
-    pushSdkDependency  = 'com.gitlab.bluedotio.android:pushnotifications:18.0.0'
-    pointSdkDependency = 'com.gitlab.bluedotio.android:point_sdk_android:18.0.0'
+    pushSdkDependency  = "com.gitlab.bluedotio.android:pushnotifications:$sdk_version"
+    pointSdkDependency = "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
 }
 
 // ---------------------------------------------------------------------------
@@ -68,7 +92,9 @@ if (gitlabPipelineId) {
 // Override the BOM version from your app's build.gradle / gradle.properties:
 //   ext.firebaseBomVersion = '34.0.0'
 // ---------------------------------------------------------------------------
-def firebaseBomVersion = safeExtGet('firebaseBomVersion', '34.12.0')
+def firebaseBomVersion = rootProject.hasProperty('firebaseBomVersion') ?
+        rootProject.property('firebaseBomVersion') : (project.hasProperty('firebaseBomVersion') ?
+        project.property('firebaseBomVersion') : '34.12.0')
 
 dependencies {
     // Core Point SDK — must match the version used by the base plugin.

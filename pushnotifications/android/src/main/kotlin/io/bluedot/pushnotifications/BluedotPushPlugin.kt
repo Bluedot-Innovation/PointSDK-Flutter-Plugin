@@ -7,12 +7,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import au.com.bluedot.point.api.push.model.RezolvePushData
 import au.com.bluedot.point.net.engine.ServiceManager
-import au.com.bluedot.pushnotifications.RezolvePushData
-import au.com.bluedot.pushnotifications.isRezolvePushNotification
-import au.com.bluedot.pushnotifications.toRezolvePushData
 import com.google.firebase.messaging.RemoteMessage
+import com.rezolve.pushnotifications.isRezolvePushNotification
+import com.rezolve.pushnotifications.toRezolvePushData
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result

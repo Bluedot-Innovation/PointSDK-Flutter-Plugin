@@ -1,8 +1,8 @@
 package io.bluedot.pushnotifications
 
 import android.content.Context
-import au.com.bluedot.pushnotifications.PushNotificationsEventReceiver
-import au.com.bluedot.pushnotifications.RezolvePushData
+import au.com.bluedot.point.api.push.model.RezolvePushData
+import com.rezolve.pushnotifications.PushNotificationsEventReceiver
 
 /**
  * Receives Bluedot push notification callbacks and forwards them to Flutter via
