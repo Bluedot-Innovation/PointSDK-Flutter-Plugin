@@ -13,11 +13,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  bluedot_point_sdk:
-    # Use path during local/monorepo development.
-    # Replace with a pub.dev version constraint when publishing:
-    #   bluedot_point_sdk: ^2.0.0
-    path: ../
+  bluedot_point_sdk: ^2.1.1
 
 flutter:
   plugin:

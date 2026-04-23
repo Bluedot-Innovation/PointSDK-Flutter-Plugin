@@ -1,74 +1,90 @@
-import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 
-/// Push notifications support for the Bluedot Point SDK (Android only).
-///
-/// ### Setup
-/// Add this package to your `pubspec.yaml`:
-/// ```yaml
-/// dependencies:
-///   bluedot_point_sdk_push:
-///     path: ../push   # or a pub.dev version once published
-/// ```
-///
+/// Called when a Bluedot push notification is received in the foreground.
+typedef NotificationReceivedHandler = void Function(Map<String, dynamic> data);
+
+/// Called when the user taps a Bluedot push notification.
+typedef NotificationClickedHandler = void Function(Map<String, dynamic> data);
+
 /// ### Receiving events
 /// ```dart
-/// MethodChannel(BluedotPointSdkPush.pushNotifications)
-///   .setMethodCallHandler((call) async {
-///     final data = Map<String, dynamic>.from(call.arguments as Map);
-///     if (call.method == PushNotificationEvents.onNotificationReceived) {
-///       // handle received notification
-///     } else if (call.method == PushNotificationEvents.onNotificationClicked) {
-///       // handle notification tap
-///     }
-///   });
+/// BluedotPointSdkPush.instance.setNotificationListener(
+///   onReceived: (data) => print('Received: $data'),
+///   onClicked:  (data) => print('Clicked: $data'),
+/// );
 /// ```
 class BluedotPointSdkPush {
-  static const _commandChannel =
-      MethodChannel('bluedot_point_flutter/push_sdk');
+  BluedotPointSdkPush._();
+  static final instance = BluedotPointSdkPush._();
 
-  /// Event channel name for push notification callbacks (Android only).
+  /// Event channel name for push notification callbacks.
   ///
   /// See [PushNotificationEvents] for the available event method names.
-  static const pushNotifications =
-      'bluedot_point_flutter/push_notification_events';
+  static const pushNotifications = 'bluedot_point_flutter/push_notification_events';
 
-  static final instance = BluedotPointSdkPush();
+  static const _eventsChannel  = MethodChannel(pushNotifications);
+  static const _commandChannel = MethodChannel('bluedot_point_flutter/push_sdk');
 
-  /// Configures a custom notification appearance for the Bluedot push
-  /// notifications module (Android only — no-op on iOS).
+  /// Register callbacks for push notification events.
   ///
-  /// Call this early in the app lifecycle, before the first push notification
-  /// arrives (e.g. right after `BluedotPointSdk.instance.initialize(...)`).
-  ///
-  /// ### Parameters
-  /// - [channelId]   — Android notification channel ID (required).
-  /// - [channelName] — Notification channel display name (required).
-  /// - [icon]        — Drawable/mipmap resource name for the small icon.
-  ///                   Falls back to the app launcher icon when omitted.
-  /// - [importance]  — Android `NotificationManager.IMPORTANCE_*` constant.
-  ///                   Defaults to `IMPORTANCE_DEFAULT` (3).
-  ///
-  /// The module fills in the notification title and body automatically from
-  /// the message payload — do not set them here.
-  Future<void> setCustomPushNotification({
-    required String channelId,
-    required String channelName,
-    String? icon,
-    int? importance,
+  /// Both parameters are optional — pass only the ones you need.
+  void setNotificationListener({
+    NotificationReceivedHandler? onReceived,
+    NotificationClickedHandler? onClicked,
   }) {
-    if (!Platform.isAndroid) return Future.value();
-    return _commandChannel.invokeMethod('setCustomPushNotification', {
-      'channelId': channelId,
-      'channelName': channelName,
-      'icon': icon,
-      'importance': importance,
+    _eventsChannel.setMethodCallHandler((call) async {
+      final data = Map<String, dynamic>.from(call.arguments as Map);
+      switch (call.method) {
+        case PushNotificationEvents.onNotificationReceived:
+          onReceived?.call(data);
+          break;
+        case PushNotificationEvents.onNotificationClicked:
+          onClicked?.call(data);
+          break;
+      }
     });
+  }
+
+  /// Remove all push notification listeners.
+  void removeNotificationListener() {
+    _eventsChannel.setMethodCallHandler(null);
+  }
+
+  /// Forward a new FCM token to the Bluedot push module.
+  ///
+  /// Call this from your `FirebaseMessaging.instance.onTokenRefresh` listener
+  /// when your app manages FCM directly (e.g. via the `firebase_messaging` package).
+  ///
+  /// Android only — no-op on iOS.
+  Future<void> onNewFcmToken(String token) async {
+    await _commandChannel.invokeMethod('onNewFcmToken', {'token': token});
+  }
+
+  /// Forward an incoming FCM message to the Bluedot push module.
+  ///
+  /// Call this from your `FirebaseMessaging.onMessage` / `onBackgroundMessage` handler
+  /// when your app manages FCM directly (e.g. via the `firebase_messaging` package).
+  /// Bluedot will silently ignore messages that are not Bluedot push notifications.
+  ///
+  /// Pass `remoteMessage.data` (the data payload map from the FCM message).
+  /// Bluedot push notifications carry all fields inside the data payload, so
+  /// the notification title/body and Bluedot-specific fields are all present there.
+  ///
+  /// Example:
+  /// ```dart
+  /// FirebaseMessaging.onMessage.listen((remoteMessage) {
+  ///   BluedotPointSdkPush.instance.onMessageReceived(remoteMessage.data);
+  /// });
+  /// ```
+  ///
+  /// Android only — no-op on iOS.
+  Future<void> onMessageReceived(Map<String, dynamic> message) async {
+    await _commandChannel.invokeMethod('onMessageReceived', message);
   }
 }
 
 /// Event method names fired on the [BluedotPointSdkPush.pushNotifications]
-/// channel (Android only).
+/// channel.
 ///
 /// `call.arguments` is a `Map<String, dynamic>` with the following fields:
 ///

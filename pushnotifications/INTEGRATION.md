@@ -130,26 +130,6 @@ void _initPushListener() {
 
 ---
 
-## Step 6 — (Optional) Customise the notification appearance
-
-By default the module uses a standard icon and `IMPORTANCE_DEFAULT`. To override, call
-`setCustomPushNotification` **before the first message arrives**
-(e.g. right after `BluedotPointSdk.instance.initialize(...)`):
-
-```dart
-await BluedotPointSdkPush.instance.setCustomPushNotification(
-  channelId:   'bluedot_push',
-  channelName: 'Bluedot Notifications',
-  icon:        'ic_stat_bluedot',   // drawable/mipmap resource name, optional
-  importance:  4,                   // NotificationManager.IMPORTANCE_HIGH, optional
-);
-```
-
-> The module fills in `.setContentTitle()` and `.setContentText()` automatically
-> from the message payload — do not set them here.
-
----
-
 ## Summary checklist
 
 - [ ] `google-services.json` added to `android/app/`

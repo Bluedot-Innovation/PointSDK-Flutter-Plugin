@@ -1,4 +1,4 @@
-package io.bluedot.bluedot_point_sdk_push
+package io.bluedot.pushnotifications
 
 import android.content.Context
 import au.com.bluedot.pushnotifications.PushNotificationsEventReceiver
@@ -11,7 +11,7 @@ import au.com.bluedot.pushnotifications.RezolvePushData
  * Registered automatically in this plugin's AndroidManifest.xml — no manual
  * manifest entry required in the consuming app.
  */
-class AppPushNotificationsReceiver : PushNotificationsEventReceiver() {
+class AppPushNotificationsEventReceiver : PushNotificationsEventReceiver() {
 
     override fun onNotificationReceived(rezolvePushData: RezolvePushData, context: Context) {
         BluedotPushPlugin.pushNotificationsChannel?.invokeMethod(

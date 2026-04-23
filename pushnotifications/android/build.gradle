@@ -47,14 +47,39 @@ android {
     }
 }
 
+def pushSdkDependency
+def pointSdkDependency
+if (gitlabPipelineId) {
+    pushSdkDependency  = "au.com.bluedot:pushnotifications:${gitlabPipelineId}"
+    pointSdkDependency = "au.com.bluedot:pointsdk:${gitlabPipelineId}"
+} else {
+    pushSdkDependency  = 'com.gitlab.bluedotio.android:pushnotifications:18.0.0'
+    pointSdkDependency = 'com.gitlab.bluedotio.android:point_sdk_android:18.0.0'
+}
+
+// ---------------------------------------------------------------------------
+// Firebase BOM version
+//
+// The consumer app is responsible for applying the google-services plugin and
+// placing google-services.json in their own app module. This library only
+// needs the firebase-messaging artifact on the compile classpath; it does NOT
+// need (or want) the google-services Gradle plugin.
+//
+// Override the BOM version from your app's build.gradle / gradle.properties:
+//   ext.firebaseBomVersion = '34.0.0'
+// ---------------------------------------------------------------------------
+def firebaseBomVersion = safeExtGet('firebaseBomVersion', '34.12.0')
+
 dependencies {
     // Core Point SDK — must match the version used by the base plugin.
-    implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
+    implementation pointSdkDependency
+
 
     // Push notifications module and its Firebase dependency.
     // These are the ONLY place in the plugin ecosystem where these artifacts are declared,
     // so they are only resolved for apps that add bluedot_point_sdk_push.
-    implementation "com.gitlab.bluedotio.android:pushnotifications:$sdk_version"
-    implementation 'com.google.firebase:firebase-messaging:25.0.1'
+    implementation pushSdkDependency
+    implementation platform("com.google.firebase:firebase-bom:${firebaseBomVersion}")
+    implementation "com.google.firebase:firebase-messaging"
 }
 
