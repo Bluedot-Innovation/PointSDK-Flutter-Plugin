@@ -127,15 +127,3 @@ void _initPushListener() {
 | `zoneId`         | `String`             | Zone UUID                               |
 | `notificationId` | `String`             | Notification UUID                       |
 | `data`           | `Map<String, String>`| Custom key-value pairs from the payload |
-
----
-
-## Summary checklist
-
-- [ ] `google-services.json` added to `android/app/`
-- [ ] `google-services` Gradle plugin applied
-- [ ] `MyFirebaseMessagingService` created and wired to `BluedotPushPlugin`
-- [ ] Service registered in `AndroidManifest.xml`
-- [ ] Push event listener set up in Flutter before app goes to background
-- [ ] `POST_NOTIFICATIONS` permission requested at runtime (Android 13+)
-

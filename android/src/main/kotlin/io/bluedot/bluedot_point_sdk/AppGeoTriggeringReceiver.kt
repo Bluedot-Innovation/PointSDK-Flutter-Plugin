@@ -1,6 +1,8 @@
 package io.bluedot.bluedot_point_sdk
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import au.com.bluedot.point.net.engine.*
 import au.com.bluedot.point.net.engine.event.*
@@ -27,18 +29,20 @@ class AppGeoTriggeringReceiver : GeoTriggeringEventReceiver() {
   // Use Dart to parse the json string and pass the resulting object to the
   // client callback.
   private fun sendEvent(eventName: String, modelName: String, jsonStr: String) {
-    BluedotPointSdkPlugin.methodChannelGeoUtils?.invokeMethod("parseJson", listOf(modelName, jsonStr), object : Result {
-      override fun success(result: Any?) {
-        BluedotPointSdkPlugin.geoTriggeringChannel?.invokeMethod(eventName, result)
-      }
-      override fun error(
-        errorCode: String, errorMessage: String?,
-        errorDetails: Any?
-      ) {
-        Log.e("AppGeoTriggeringRecv", "[sendEvent] failed")
-      }
+    Handler(Looper.getMainLooper()).post {
+      BluedotPointSdkPlugin.methodChannelGeoUtils?.invokeMethod("parseJson", listOf(modelName, jsonStr), object : Result {
+        override fun success(result: Any?) {
+          BluedotPointSdkPlugin.geoTriggeringChannel?.invokeMethod(eventName, result)
+        }
+        override fun error(
+          errorCode: String, errorMessage: String?,
+          errorDetails: Any?
+        ) {
+          Log.e("AppGeoTriggeringRecv", "[sendEvent] failed")
+        }
 
-      override fun notImplemented() {}
-    })
+        override fun notImplemented() {}
+      })
+    }
   }
 }
