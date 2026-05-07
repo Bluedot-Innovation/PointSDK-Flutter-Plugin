@@ -15,18 +15,6 @@ buildscript {
     }
 }
 
-// Load local.properties from the consumer app's root project so that
-// gitlabPipelineId / gitlabMavenToken defined there are visible here.
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader -> localProperties.load(reader) }
-}
-
-def gitlabPipelineId = localProperties.getProperty('gitlabPipelineId') ?:
-        rootProject.findProperty('gitlabPipelineId') ?: project.findProperty('gitlabPipelineId') ?: ''
-def gitlabMavenToken = localProperties.getProperty('gitlabMavenToken') ?:
-        rootProject.findProperty('gitlabMavenToken') ?: project.findProperty('gitlabMavenToken') ?: ''
 
 rootProject.allprojects {
     repositories {
@@ -34,18 +22,6 @@ rootProject.allprojects {
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-        if (gitlabPipelineId) {
-            maven {
-                url 'https://gitlab.com/api/v4/projects/14682665/packages/maven'
-                credentials(HttpHeaderCredentials) {
-                    name  'Private-Token'
-                    value gitlabMavenToken
-                }
-                authentication {
-                    header(HttpHeaderAuthentication)
-                }
-            }
-        }
     }
 }
 
@@ -72,9 +48,5 @@ android {
 }
 
 dependencies {
-    if (gitlabPipelineId) {
-        implementation "au.com.bluedot:pointsdk:${gitlabPipelineId}"
-    } else {
-        implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
-    }
+    implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
 }

@@ -1,5 +1,5 @@
 # Sub-plugins — published as separate packages, not part of this package
-pushnotifications/
+PointSDK-Flutter-Push/
 
 # Internal docs not intended for pub.dev
 push.md

@@ -15,38 +15,12 @@ buildscript {
     }
 }
 
-// Load local.properties from the consumer app's root project (the standard
-// Flutter/Android location) so that gitlabPipelineId / gitlabMavenToken set
-// there are visible to this plugin's build script.
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withReader('UTF-8') { reader -> localProperties.load(reader) }
-}
-
-def gitlabPipelineId = localProperties.getProperty('gitlabPipelineId') ?:
-        rootProject.findProperty('gitlabPipelineId') ?: project.findProperty('gitlabPipelineId') ?: ''
-def gitlabMavenToken = localProperties.getProperty('gitlabMavenToken') ?:
-        rootProject.findProperty('gitlabMavenToken') ?: project.findProperty('gitlabMavenToken') ?: ''
-
 rootProject.allprojects {
     repositories {
         mavenLocal()
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-        if (gitlabPipelineId) {
-            maven {
-                url 'https://gitlab.com/api/v4/projects/14682665/packages/maven'
-                credentials(HttpHeaderCredentials) {
-                    name  'Private-Token'
-                    value gitlabMavenToken
-                }
-                authentication {
-                    header(HttpHeaderAuthentication)
-                }
-            }
-        }
     }
 }
 
@@ -71,16 +45,6 @@ android {
     }
 }
 
-def pushSdkDependency
-def pointSdkDependency
-if (gitlabPipelineId) {
-    pushSdkDependency  = "au.com.bluedot:pushnotifications:${gitlabPipelineId}"
-    pointSdkDependency = "au.com.bluedot:pointsdk:${gitlabPipelineId}"
-} else {
-    pushSdkDependency  = "com.gitlab.bluedotio.android:pushnotifications:$sdk_version"
-    pointSdkDependency = "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
-}
-
 // ---------------------------------------------------------------------------
 // Firebase BOM version
 //
@@ -98,13 +62,13 @@ def firebaseBomVersion = rootProject.hasProperty('firebaseBomVersion') ?
 
 dependencies {
     // Core Point SDK — must match the version used by the base plugin.
-    implementation pointSdkDependency
+    implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
 
 
     // Push notifications module and its Firebase dependency.
     // These are the ONLY place in the plugin ecosystem where these artifacts are declared,
     // so they are only resolved for apps that add bluedot_point_sdk_push.
-    implementation pushSdkDependency
+    implementation "com.gitlab.bluedotio.android:point_sdk_push:$sdk_version"
     implementation platform("com.google.firebase:firebase-bom:${firebaseBomVersion}")
     implementation "com.google.firebase:firebase-messaging"
 }
