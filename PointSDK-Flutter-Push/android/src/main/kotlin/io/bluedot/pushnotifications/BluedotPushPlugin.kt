@@ -71,6 +71,7 @@ class BluedotPushPlugin : FlutterPlugin, MethodCallHandler {
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         commandChannel?.setMethodCallHandler(null)
         commandChannel = null
+        pushNotificationsChannel = null
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
