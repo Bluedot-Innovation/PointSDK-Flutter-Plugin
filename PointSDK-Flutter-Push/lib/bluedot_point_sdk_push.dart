@@ -34,7 +34,7 @@ class BluedotPointSdkPush {
     NotificationReceivedHandler? onReceived,
     NotificationClickedHandler? onClicked,
   }) async {
-    await _eventsChannel.setMethodCallHandler((call) async {
+    _eventsChannel.setMethodCallHandler((call) async {
       final data = Map<String, dynamic>.from(call.arguments as Map);
       switch (call.method) {
         case PushNotificationEvents.onNotificationReceived:
@@ -52,7 +52,7 @@ class BluedotPointSdkPush {
 
   /// Remove all push notification listeners.
   Future<void> removeNotificationListener() async {
-    await _eventsChannel.setMethodCallHandler(null);
+    _eventsChannel.setMethodCallHandler(null);
     if (Platform.isIOS) {
       await _commandChannel.invokeMethod<void>('notificationListenerRemoved');
     }
