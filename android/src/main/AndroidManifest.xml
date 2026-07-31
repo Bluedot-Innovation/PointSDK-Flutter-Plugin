@@ -1,6 +1,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
 <application>
+    <!--
+        Auto-initializes ServiceManager (and therefore ContextProvider.applicationContext)
+        at process start, before WorkManager can dispatch any pending workers.
+        This prevents UninitializedPropertyAccessException when the
+        app process is restarted after an SDK reset.
+    -->
+    <provider
+        android:name="io.bluedot.bluedot_point_sdk.BluedotInitProvider"
+        android:authorities="${applicationId}.bluedot.init"
+        android:exported="false"
+        android:initOrder="100" />
     <receiver
         android:name="io.bluedot.bluedot_point_sdk.BluedotErrorReceiver"
         android:enabled="true"

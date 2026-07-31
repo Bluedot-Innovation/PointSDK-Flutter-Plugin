@@ -3,7 +3,7 @@ version '2.1.2'
 
 buildscript {
     ext.kotlin_version = '2.3.0'
-    ext.sdk_version = '17.4.1'
+    ext.sdk_version = '18.0.0'
     repositories {
         google()
         mavenCentral()
@@ -14,6 +14,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
+
 
 rootProject.allprojects {
     repositories {
@@ -48,7 +49,4 @@ android {
 
 dependencies {
     implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
-
-    //NOTE: This is used when building with MavenLocal.
-    //implementation "com.github.Bluedot-Innovation:pointsdk:1262"
 }

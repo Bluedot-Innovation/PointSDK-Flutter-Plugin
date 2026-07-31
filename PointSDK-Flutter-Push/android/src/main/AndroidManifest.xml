@@ -1,0 +1,48 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <!--
+            AppPushNotificationsEventReceiver: receives push notification callbacks
+            (onNotificationReceived / onNotificationClicked) from the Bluedot Push SDK
+            and bridges them to the React Native JS layer.
+        -->
+        <receiver
+            android:name="io.bluedot.pushnotifications.AppPushNotificationsEventReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="io.bluedot.point.PUSHNOTIFICATIONS" />
+            </intent-filter>
+        </receiver>
+
+        <!--
+            DefaultMessagingService: automatic FCM handler for Pattern A (no @react-native-firebase).
+
+            Registered at intent-filter priority -1. Any FirebaseMessagingService the consumer
+            app registers without an explicit priority defaults to 0, which takes precedence.
+            This service is never reached once the consumer registers their own.
+
+            Pattern B  - @react-native-firebase/messaging:
+            That library registers its own service at priority 0, pre-empting this one.
+            Forward messages to Bluedot via the JS bridge instead:
+              PushNotifications.onMessageReceived(msg) and PushNotifications.onNewFcmToken(token).
+
+            Pattern C  - multiple push sources (e.g. Airship + Bluedot):
+            Register your own FirebaseMessagingService (default priority 0). Route Bluedot
+            messages to ServiceManager.getInstance(this).pushNotificationsManager inside it.
+            This service is pre-empted automatically. No manifest changes needed.
+
+            To remove this service from the merged manifest entirely, add a service element
+            in your app AndroidManifest.xml with tools:node="remove" targeting this class name.
+        -->
+        <service
+            android:name="io.bluedot.pushnotifications.DefaultMessagingService"
+            android:exported="false">
+            <intent-filter android:priority="-1">
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>
+
