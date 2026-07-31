@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 
 /// Called when a Bluedot push notification is received in the foreground.
@@ -28,11 +30,11 @@ class BluedotPointSdkPush {
   /// Register callbacks for push notification events.
   ///
   /// Both parameters are optional — pass only the ones you need.
-  void setNotificationListener({
+  Future<void> setNotificationListener({
     NotificationReceivedHandler? onReceived,
     NotificationClickedHandler? onClicked,
-  }) {
-    _eventsChannel.setMethodCallHandler((call) async {
+  }) async {
+    await _eventsChannel.setMethodCallHandler((call) async {
       final data = Map<String, dynamic>.from(call.arguments as Map);
       switch (call.method) {
         case PushNotificationEvents.onNotificationReceived:
@@ -43,11 +45,28 @@ class BluedotPointSdkPush {
           break;
       }
     });
+    if (Platform.isIOS) {
+      await _commandChannel.invokeMethod<void>('notificationListenerReady');
+    }
   }
 
   /// Remove all push notification listeners.
-  void removeNotificationListener() {
-    _eventsChannel.setMethodCallHandler(null);
+  Future<void> removeNotificationListener() async {
+    await _eventsChannel.setMethodCallHandler(null);
+    if (Platform.isIOS) {
+      await _commandChannel.invokeMethod<void>('notificationListenerRemoved');
+    }
+  }
+
+  /// Register this device with the platform push notification service.
+  ///
+  /// On iOS, call this after notification permission has been granted. The APNs
+  /// device token is forwarded to PointSDK automatically. On Android, FCM
+  /// registration is managed by Firebase and this method does nothing.
+  Future<void> registerForRemoteNotifications() async {
+    if (Platform.isIOS) {
+      await _commandChannel.invokeMethod<void>('registerForRemoteNotifications');
+    }
   }
 
   /// Forward a new FCM token to the Bluedot push module.
@@ -101,4 +120,3 @@ class PushNotificationEvents {
   static const onNotificationReceived = 'onNotificationReceived';
   static const onNotificationClicked  = 'onNotificationClicked';
 }
-
