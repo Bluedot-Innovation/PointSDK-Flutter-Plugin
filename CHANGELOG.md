@@ -1,5 +1,9 @@
 # Flutter Bluedot Point SDK Plugin release notes
 
+## 2.1.4
+- Updated to iOS PointSDK v17.2.1 for custom event metadata persistence after app termination.
+- Android remains on PointSDK v17.4.1.
+
 ## 2.1.3
 - Fixed an iOS crash when a GeoTriggering or Tempo event is delivered during a background app launch.
 
