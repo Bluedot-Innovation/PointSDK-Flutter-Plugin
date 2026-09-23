@@ -5,7 +5,7 @@ homepage: "https://bluedot.io"
 repository:  "https://github.com/Bluedot-Innovation/PointSDK-Flutter-Plugin"
 
 environment:
-  sdk: ">=2.17.6 <4.0.0"
+  sdk: ">=2.17.6 <3.0.0"
   flutter: ">=2.5.0"
 
 dependencies:

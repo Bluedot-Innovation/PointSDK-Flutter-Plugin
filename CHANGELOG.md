@@ -1,8 +1,15 @@
 # Flutter Bluedot Point SDK Plugin release notes
 
 ## 2.2.0
-- Updated to iOS PointSDK v18.0.0.
+- Updated to iOS PointSDK v18.1.0.
 - Added iOS support to the optional `bluedot_point_sdk_push` package, including APNs registration, foreground delivery, notification-click events, and Dart listener buffering.
+
+## 2.1.4
+- Updated to iOS PointSDK v17.2.1 for custom event metadata persistence after app termination.
+- Android remains on PointSDK v17.4.1.
+
+## 2.1.3
+- Fixed an iOS crash when a GeoTriggering or Tempo event is delivered during a background app launch.
 
 ## 2.1.1
 - Updated to Android Point SDK v17.4.1 and iOS Point SDK v17.2.0

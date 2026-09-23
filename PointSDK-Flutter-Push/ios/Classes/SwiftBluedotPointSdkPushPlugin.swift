@@ -33,6 +33,21 @@ public final class SwiftBluedotPointSdkPushPlugin: NSObject,
 
         registrar.addMethodCallDelegate(instance, channel: commandChannel)
         registrar.addApplicationDelegate(instance)
+
+        // FlutterAppDelegate multiplexes notification callbacks to registered plugins, but it
+        // never makes itself the UNUserNotificationCenter delegate. Apps that register their
+        // plugins from a UISceneDelegate do so *after* didFinishLaunchingWithOptions has already
+        // been dispatched, so installing the delegate here is what actually guarantees delivery.
+        installNotificationCenterDelegate()
+    }
+
+    /// Makes the app delegate the `UNUserNotificationCenter` delegate, so that
+    /// `FlutterAppDelegate` forwards notification callbacks to this plugin.
+    private static func installNotificationCenterDelegate() {
+        guard let delegate = UIApplication.shared.delegate as? UNUserNotificationCenterDelegate else {
+            return
+        }
+        UNUserNotificationCenter.current().delegate = delegate
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -64,10 +79,8 @@ public final class SwiftBluedotPointSdkPushPlugin: NSObject,
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any] = [:]
     ) -> Bool {
-        // FlutterAppDelegate multiplexes notification callbacks to registered plugins.
-        if let delegate = application.delegate as? UNUserNotificationCenterDelegate {
-            UNUserNotificationCenter.current().delegate = delegate
-        }
+        // Covers apps whose plugins are already registered by the time launch is dispatched.
+        SwiftBluedotPointSdkPushPlugin.installNotificationCenterDelegate()
         return true
     }
 
