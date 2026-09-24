@@ -8,13 +8,11 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
     private var geoTriggeringMethodChannel: FlutterMethodChannel?
     private var tempoMethodChannel: FlutterMethodChannel?
     private var bluedotServiceMethodChannel: FlutterMethodChannel?
-    private var geoTriggeringUtilsChannel: FlutterMethodChannel?
     
     static let flutterPluginChannel = "bluedot_point_flutter/bluedot_point_sdk"
     static let geoTriggeringChannel = "bluedot_point_flutter/geo_triggering_events"
     static let tempoChannel = "bluedot_point_flutter/tempo_events"
     static let bluedotServiceChannel = "bluedot_point_flutter/bluedot_service_events"
-    static let geoTriggeringUtilsChannel = "bluedot_point_flutter/geo_triggering_utils"
     
     public override init() {
         super.init()
@@ -28,13 +26,11 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         let geoTriggeringMethodChannel = FlutterMethodChannel(name: geoTriggeringChannel, binaryMessenger: registrar.messenger())
         let tempoMethodChannel = FlutterMethodChannel(name: tempoChannel, binaryMessenger: registrar.messenger())
         let bluedotServiceMethodChannel = FlutterMethodChannel(name: bluedotServiceChannel, binaryMessenger: registrar.messenger())
-        let geoTriggeringUtilsChannel = FlutterMethodChannel(name: geoTriggeringUtilsChannel, binaryMessenger: registrar.messenger())
         let instance = SwiftBluedotPointSdkPlugin()
         instance.methodChannel = channel
         instance.geoTriggeringMethodChannel = geoTriggeringMethodChannel
         instance.tempoMethodChannel = tempoMethodChannel
         instance.bluedotServiceMethodChannel = bluedotServiceMethodChannel
-        instance.geoTriggeringUtilsChannel = geoTriggeringUtilsChannel
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
 
@@ -228,37 +224,41 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
     private func flutterErrorToDict(_ error: FlutterError) -> [String: String] {
         return ["code": error.code, "message" : error.message ?? "Unknown", "details": ""]
     }
+
+    // Decode natively so background launches do not depend on a Dart method
+    // handler being registered before PointSDK delivers an event.
+    private func decodeJSON(_ jsonString: String) -> Any? {
+        guard !jsonString.isEmpty, let data = jsonString.data(using: .utf8) else {
+            return nil
+        }
+
+        return try? JSONSerialization.jsonObject(with: data)
+    }
 }
 
 extension SwiftBluedotPointSdkPlugin: BDPGeoTriggeringEventDelegate {
 
     public func didUpdateZoneInfo() {
-        sendEvent(eventName: "didUpdateZoneInfo", modelName: "", jsonStr: "")
+        sendEvent(eventName: "didUpdateZoneInfo", jsonStr: "")
     }
     
     public func didEnterZone(_ enterEvent: GeoTriggerEvent) {
         let json = (try? enterEvent.toJson() as String?) ?? ""
-        sendEvent(eventName: "didEnterZone", modelName: "GeoTriggerEvent", jsonStr: json)
+        sendEvent(eventName: "didEnterZone", jsonStr: json)
     }
     
     public func didExitZone(_ exitEvent: GeoTriggerEvent) {
         let json = (try? exitEvent.toJson() as String?) ?? ""
-        sendEvent(eventName: "didExitZone", modelName: "GeoTriggerEvent", jsonStr: json)
+        sendEvent(eventName: "didExitZone", jsonStr: json)
     }
 
     public func didDwell(inZone dwellEvent: GeoTriggerEvent) {
         let json = (try? dwellEvent.toJson() as String?) ?? ""
-        sendEvent(eventName: "didDwellInZone", modelName: "GeoTriggerEvent", jsonStr: json)
+        sendEvent(eventName: "didDwellInZone", jsonStr: json)
     }
 
-    // Use Dart to parse the json string and pass the resulting object to the
-    // client callback.
-    private func sendEvent(eventName: String, modelName: String, jsonStr: String) -> Any {
-        self.geoTriggeringUtilsChannel?.invokeMethod(
-            "parseJson",
-            arguments : [modelName, jsonStr], result: {(r:Any?) -> () in
-                self.geoTriggeringMethodChannel?.invokeMethod(eventName, arguments: r)
-        })
+    private func sendEvent(eventName: String, jsonStr: String) {
+        self.geoTriggeringMethodChannel?.invokeMethod(eventName, arguments: decodeJSON(jsonStr))
     }
 }
 
@@ -274,17 +274,11 @@ extension SwiftBluedotPointSdkPlugin: BDPTempoTrackingDelegate {
 
     public func tempoTrackingDidUpdate(_ tempoUpdate: TempoTrackingUpdate) {
         let json = (try? tempoUpdate.toJson() as String?) ?? ""
-        sendTempoEvent(eventName: "tempoTrackingDidUpdate", modelName: "TempoTrackingUpdate", jsonStr: json)
+        sendTempoEvent(eventName: "tempoTrackingDidUpdate", jsonStr: json)
     }
 
-    // Use Dart to parse the json string and pass the resulting object to the
-    // client callback.
-    private func sendTempoEvent(eventName: String, modelName: String, jsonStr: String) -> Any {
-        self.geoTriggeringUtilsChannel?.invokeMethod(
-            "parseJson",
-            arguments : [modelName, jsonStr], result: {(r:Any?) -> () in
-                self.tempoMethodChannel?.invokeMethod(eventName, arguments: r)
-        })
+    private func sendTempoEvent(eventName: String, jsonStr: String) {
+        self.tempoMethodChannel?.invokeMethod(eventName, arguments: decodeJSON(jsonStr))
     }
 }
 
