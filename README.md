@@ -9,7 +9,7 @@ including notifications from location-triggered campaigns configured in Canvas.
 
 - To check out the package documentation, visit our [docs website](https://docs.bluedot.io/flutter-library/).
 - To see an implementation example refer to our [Flutter Minimal Integration Example](https://github.com/Bluedot-Innovation/Flutter-Minimal-Integration)
-- iOS push notification setup is documented in [PointSDK-Flutter-Push/IOS_INTEGRATION.md](PointSDK-Flutter-Push/IOS_INTEGRATION.md).
+- Push notification setup for both platforms is documented in [PointSDK-Flutter-Push/INTEGRATION.md](PointSDK-Flutter-Push/INTEGRATION.md).
 
 ## Current Support
 

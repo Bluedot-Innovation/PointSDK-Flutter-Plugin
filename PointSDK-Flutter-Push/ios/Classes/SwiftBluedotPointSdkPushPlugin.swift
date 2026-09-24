@@ -5,10 +5,12 @@ import UserNotifications
 
 public final class SwiftBluedotPointSdkPushPlugin: NSObject,
     FlutterPlugin,
-    FlutterApplicationLifeCycleDelegate,
-    UNUserNotificationCenterDelegate {
+    FlutterApplicationLifeCycleDelegate {
     private static let commandChannelName = "bluedot_point_flutter/push_sdk"
     private static let eventsChannelName = "bluedot_point_flutter/push_notification_events"
+
+    /// The registered plugin instance, used by the forward-in entry points below.
+    private static var current: SwiftBluedotPointSdkPushPlugin?
 
     private let eventsChannel: FlutterMethodChannel
     private var isListenerReady = false
@@ -32,22 +34,50 @@ public final class SwiftBluedotPointSdkPushPlugin: NSObject,
         let instance = SwiftBluedotPointSdkPushPlugin(eventsChannel: eventsChannel)
 
         registrar.addMethodCallDelegate(instance, channel: commandChannel)
+        // Needed for the APNs device-token callback below. Notification presentation and taps
+        // are deliberately left to the host application — see the forward-in API.
         registrar.addApplicationDelegate(instance)
 
-        // FlutterAppDelegate multiplexes notification callbacks to registered plugins, but it
-        // never makes itself the UNUserNotificationCenter delegate. Apps that register their
-        // plugins from a UISceneDelegate do so *after* didFinishLaunchingWithOptions has already
-        // been dispatched, so installing the delegate here is what actually guarantees delivery.
-        installNotificationCenterDelegate()
+        current = instance
     }
 
-    /// Makes the app delegate the `UNUserNotificationCenter` delegate, so that
-    /// `FlutterAppDelegate` forwards notification callbacks to this plugin.
-    private static func installNotificationCenterDelegate() {
-        guard let delegate = UIApplication.shared.delegate as? UNUserNotificationCenterDelegate else {
+    // MARK: - Forward-in API for the host application
+    //
+    // Flutter forwards `UNUserNotificationCenterDelegate` callbacks to *every* registered plugin
+    // with the *same* completion handler, so a plugin implementing them can complete a handler
+    // that the host app or another plugin completes as well. The host app therefore owns
+    // `userNotificationCenter(_:willPresent:)` and `userNotificationCenter(_:didReceive:)` and
+    // forwards to PointSDK through these methods. It also owns the presentation options, so a
+    // notification belonging to another provider keeps whatever presentation the app chooses.
+
+    /// Forwards a notification received in the foreground to PointSDK, and emits the
+    /// `onNotificationReceived` event to Dart when PointSDK owns the notification.
+    ///
+    /// Call from `userNotificationCenter(_:willPresent:withCompletionHandler:)`.
+    /// - Returns: `true` when PointSDK handled the notification.
+    @objc
+    @discardableResult
+    public static func handleForegroundNotification(_ notification: UNNotification) -> Bool {
+        let handled = BDLocationManager.instance().pushNotifications.handleForeground(notification)
+        if handled {
+            current?.emit(method: "onNotificationReceived", notification: notification)
+        }
+        return handled
+    }
+
+    /// Forwards a notification tap to PointSDK, and emits the `onNotificationClicked` event to
+    /// Dart when PointSDK owns the notification.
+    ///
+    /// Call from `userNotificationCenter(_:didReceive:withCompletionHandler:)`.
+    @objc
+    public static func handleNotificationResponse(_ response: UNNotificationResponse) {
+        BDLocationManager.instance().pushNotifications.handleResponse(response)
+
+        let notification = response.notification
+        guard let instance = current, instance.isValidBluedotNotification(notification) else {
             return
         }
-        UNUserNotificationCenter.current().delegate = delegate
+        instance.emit(method: "onNotificationClicked", notification: notification)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -77,48 +107,9 @@ public final class SwiftBluedotPointSdkPushPlugin: NSObject,
 
     public func application(
         _ application: UIApplication,
-        didFinishLaunchingWithOptions launchOptions: [AnyHashable: Any] = [:]
-    ) -> Bool {
-        // Covers apps whose plugins are already registered by the time launch is dispatched.
-        SwiftBluedotPointSdkPushPlugin.installNotificationCenterDelegate()
-        return true
-    }
-
-    public func application(
-        _ application: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
         BDLocationManager.instance().pushNotifications.register(deviceToken)
-    }
-
-    public func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        willPresent notification: UNNotification,
-        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
-    ) {
-        let handled = BDLocationManager.instance().pushNotifications.handleForeground(notification)
-        if handled {
-            emit(method: "onNotificationReceived", notification: notification)
-            completionHandler([.banner, .list, .sound, .badge])
-        } else {
-            // Preserve normal foreground presentation for notifications owned by
-            // another provider while omitting sound, matching the native sample.
-            completionHandler([.banner, .list, .badge])
-        }
-    }
-
-    public func userNotificationCenter(
-        _ center: UNUserNotificationCenter,
-        didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping () -> Void
-    ) {
-        let notification = response.notification
-        BDLocationManager.instance().pushNotifications.handleResponse(response)
-
-        if isValidBluedotNotification(notification) {
-            emit(method: "onNotificationClicked", notification: notification)
-        }
-        completionHandler()
     }
 
     private func emit(method: String, notification: UNNotification) {

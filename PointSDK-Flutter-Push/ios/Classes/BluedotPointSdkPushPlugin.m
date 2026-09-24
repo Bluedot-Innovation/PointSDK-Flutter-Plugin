@@ -11,4 +11,12 @@
     [SwiftBluedotPointSdkPushPlugin registerWithRegistrar:registrar];
 }
 
++ (BOOL)handleForegroundNotification:(UNNotification *)notification {
+    return [SwiftBluedotPointSdkPushPlugin handleForegroundNotification:notification];
+}
+
++ (void)handleNotificationResponse:(UNNotificationResponse *)response {
+    [SwiftBluedotPointSdkPushPlugin handleNotificationResponse:response];
+}
+
 @end
