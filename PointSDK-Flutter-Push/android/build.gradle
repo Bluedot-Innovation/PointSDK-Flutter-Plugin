@@ -1,5 +1,5 @@
 group 'io.bluedot.bluedot_point_sdk_push'
-version '2.2.0'
+version '1.0.0'
 
 buildscript {
     ext.kotlin_version = '2.3.0'

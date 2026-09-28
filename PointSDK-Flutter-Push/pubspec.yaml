@@ -2,7 +2,7 @@ name: bluedot_point_sdk_push
 description: >
   Optional push notifications module for the Bluedot Point SDK Flutter plugin.
   Adds APNs and Firebase Cloud Messaging support via PointSDK.
-version: 2.2.0
+version: 1.0.0
 homepage: "https://bluedot.io"
 
 environment:

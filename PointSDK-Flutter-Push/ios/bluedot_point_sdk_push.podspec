@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = 'bluedot_point_sdk_push'
-  s.version          = '2.2.0'
+  s.version          = '1.0.0'
   s.summary          = 'Push notifications for the Bluedot Point SDK Flutter plugin.'
   s.description      = <<-DESC
     Push notification support for the Bluedot Point SDK Flutter plugin on iOS and Android.
