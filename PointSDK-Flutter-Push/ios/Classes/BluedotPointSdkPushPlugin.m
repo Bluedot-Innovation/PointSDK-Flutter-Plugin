@@ -1,17 +1,22 @@
 #import "BluedotPointSdkPushPlugin.h"
-
-// Push notifications are Android-only. This iOS implementation is a no-op stub
-// so the package can be included in cross-platform Flutter projects without errors.
+#if __has_include(<bluedot_point_sdk_push/bluedot_point_sdk_push-Swift.h>)
+#import <bluedot_point_sdk_push/bluedot_point_sdk_push-Swift.h>
+#else
+#import "bluedot_point_sdk_push-Swift.h"
+#endif
 
 @implementation BluedotPointSdkPushPlugin
 
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
-    // No-op on iOS.
+    [SwiftBluedotPointSdkPushPlugin registerWithRegistrar:registrar];
 }
 
-- (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
-    result(FlutterMethodNotImplemented);
++ (BOOL)handleForegroundNotification:(UNNotification *)notification {
+    return [SwiftBluedotPointSdkPushPlugin handleForegroundNotification:notification];
+}
+
++ (void)handleNotificationResponse:(UNNotificationResponse *)response {
+    [SwiftBluedotPointSdkPushPlugin handleNotificationResponse:response];
 }
 
 @end
-
