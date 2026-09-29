@@ -3,6 +3,8 @@
 ## 2.2.0
 - Updated to iOS PointSDK v18.1.0.
 - Added iOS support to the optional `bluedot_point_sdk_push` package, including APNs registration, foreground delivery, notification-click events, and Dart listener buffering.
+- **Breaking:** Minimum Android API level raised from 19 to 29. Devices on Android 5–9 (API 21–28) are no longer supported.
+- Updated to Android PointSDK v18.0.0.
 
 ## 2.1.4
 - Updated to iOS PointSDK v17.2.1 for custom event metadata persistence after app termination.

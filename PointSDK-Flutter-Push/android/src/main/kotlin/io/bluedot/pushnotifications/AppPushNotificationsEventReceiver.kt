@@ -1,6 +1,8 @@
 package io.bluedot.pushnotifications
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import au.com.bluedot.point.api.push.model.RezolvePushData
 import com.rezolve.pushnotifications.PushNotificationsEventReceiver
 
@@ -14,17 +16,21 @@ import com.rezolve.pushnotifications.PushNotificationsEventReceiver
 class AppPushNotificationsEventReceiver : PushNotificationsEventReceiver() {
 
     override fun onNotificationReceived(rezolvePushData: RezolvePushData, context: Context) {
-        BluedotPushPlugin.pushNotificationsChannel?.invokeMethod(
-            "onNotificationReceived",
-            rezolvePushData.toMap()
-        )
+        Handler(Looper.getMainLooper()).post {
+            BluedotPushPlugin.pushNotificationsChannel?.invokeMethod(
+                "onNotificationReceived",
+                rezolvePushData.toMap()
+            )
+        }
     }
 
     override fun onNotificationClicked(rezolvePushData: RezolvePushData, context: Context) {
-        BluedotPushPlugin.pushNotificationsChannel?.invokeMethod(
-            "onNotificationClicked",
-            rezolvePushData.toMap()
-        )
+        Handler(Looper.getMainLooper()).post {
+            BluedotPushPlugin.pushNotificationsChannel?.invokeMethod(
+                "onNotificationClicked",
+                rezolvePushData.toMap()
+            )
+        }
     }
 
     private fun RezolvePushData.toMap(): Map<String, Any?> = mapOf(

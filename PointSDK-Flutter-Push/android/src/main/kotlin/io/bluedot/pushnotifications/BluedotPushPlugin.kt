@@ -23,7 +23,7 @@ class BluedotPushPlugin : FlutterPlugin, MethodCallHandler {
 
     companion object {
         /** Exposed so AppPushNotificationsReceiver can invoke push event callbacks. */
-        @JvmStatic var pushNotificationsChannel: MethodChannel? = null
+        @JvmStatic @Volatile var pushNotificationsChannel: MethodChannel? = null
 
         /**
          * Forward a new FCM token to the Bluedot push module.

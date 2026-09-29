@@ -4,7 +4,7 @@
         <!--
             AppPushNotificationsEventReceiver: receives push notification callbacks
             (onNotificationReceived / onNotificationClicked) from the Bluedot Push SDK
-            and bridges them to the React Native JS layer.
+            and bridges them to the Flutter engine.
         -->
         <receiver
             android:name="io.bluedot.pushnotifications.AppPushNotificationsEventReceiver"
