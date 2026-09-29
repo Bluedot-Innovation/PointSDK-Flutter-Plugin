@@ -8,7 +8,9 @@ import com.rezolve.pushnotifications.PushNotificationsEventReceiver
 
 /**
  * Receives Bluedot push notification callbacks and forwards them to Flutter via
- * [BluedotPushPlugin.pushNotificationsChannel].
+ * [BluedotPushPlugin.sendOrQueueEvent]. Events that arrive before the Flutter engine has
+ * attached (e.g. a cold-start-on-notification-tap) are buffered by the plugin and replayed
+ * once it attaches.
  *
  * Registered automatically in this plugin's AndroidManifest.xml — no manual
  * manifest entry required in the consuming app.
@@ -17,7 +19,7 @@ class AppPushNotificationsEventReceiver : PushNotificationsEventReceiver() {
 
     override fun onNotificationReceived(rezolvePushData: RezolvePushData, context: Context) {
         Handler(Looper.getMainLooper()).post {
-            BluedotPushPlugin.pushNotificationsChannel?.invokeMethod(
+            BluedotPushPlugin.sendOrQueueEvent(
                 "onNotificationReceived",
                 rezolvePushData.toMap()
             )
@@ -26,7 +28,7 @@ class AppPushNotificationsEventReceiver : PushNotificationsEventReceiver() {
 
     override fun onNotificationClicked(rezolvePushData: RezolvePushData, context: Context) {
         Handler(Looper.getMainLooper()).post {
-            BluedotPushPlugin.pushNotificationsChannel?.invokeMethod(
+            BluedotPushPlugin.sendOrQueueEvent(
                 "onNotificationClicked",
                 rezolvePushData.toMap()
             )
