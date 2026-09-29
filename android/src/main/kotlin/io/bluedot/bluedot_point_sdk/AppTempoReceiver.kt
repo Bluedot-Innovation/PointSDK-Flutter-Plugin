@@ -5,7 +5,6 @@ import android.util.Log
 import au.com.bluedot.point.net.engine.BDError
 import au.com.bluedot.point.net.engine.TempoTrackingReceiver
 import au.com.bluedot.point.net.engine.event.TempoTrackingUpdate
-import io.flutter.plugin.common.MethodChannel.Result
 
 class AppTempoReceiver : TempoTrackingReceiver() {
     /**
@@ -25,28 +24,16 @@ class AppTempoReceiver : TempoTrackingReceiver() {
 
     override fun onTempoTrackingUpdate(tempoTrackingUpdate: TempoTrackingUpdate, context: Context) {
         Log.d("AppTempoReceiver", "[onTempoTrackingUpdate] $tempoTrackingUpdate")
-        sendEvent("tempoTrackingDidUpdate", "TempoTrackingUpdate", tempoTrackingUpdate.toJson())
+        sendEvent("tempoTrackingDidUpdate", tempoTrackingUpdate.toJson())
     }
 
     private fun sendEvent(eventName: String, params: Map<String, Any?>) {
         BluedotPointSdkPlugin.tempoChannel?.invokeMethod(eventName, params)
     }
 
-    // Use Dart to parse the json string and pass the resulting object to the
-    // client callback.
-    private fun sendEvent(eventName: String, modelName: String, jsonStr: String) {
-        BluedotPointSdkPlugin.methodChannelGeoUtils?.invokeMethod("parseJson", listOf(modelName, jsonStr), object : Result {
-            override fun success(result: Any?) {
-                BluedotPointSdkPlugin.tempoChannel?.invokeMethod(eventName, result)
-            }
-            override fun error(
-                    errorCode: String, errorMessage: String?,
-                    errorDetails: Any?
-            ) {
-                Log.e("AppTempoReceiver", "[sendEvent] failed")
-            }
-
-            override fun notImplemented() {}
-        })
+    // Decode natively so background launches do not depend on a Dart method
+    // handler being registered before PointSDK delivers an event.
+    private fun sendEvent(eventName: String, jsonStr: String) {
+        BluedotPointSdkPlugin.tempoChannel?.invokeMethod(eventName, JsonUtils.decodeJSON(jsonStr))
     }
 }
