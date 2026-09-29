@@ -1,4 +1,3 @@
-import 'bluedot_point_sdk_models.dart';
 import 'bluedot_point_sdk_platform_interface.dart';
 import 'tempo_builder.dart';
 import 'geo_triggering_builder.dart';
@@ -10,11 +9,6 @@ class BluedotPointSdk {
 
   /// The singleton instance of Bluedot Point SDK
   static final instance = BluedotPointSdk();
-
-  BluedotPointSdk() {
-    // Create models instance.
-    BluedotPointSdkModels();
-  }
 
   /// Initialize PointSDK with [projectId]. You can find your [projectId] on Bluedot
   /// Canvas portal.

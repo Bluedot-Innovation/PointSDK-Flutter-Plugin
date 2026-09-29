@@ -23,7 +23,47 @@ class BluedotPushPlugin : FlutterPlugin, MethodCallHandler {
 
     companion object {
         /** Exposed so AppPushNotificationsReceiver can invoke push event callbacks. */
-        @JvmStatic var pushNotificationsChannel: MethodChannel? = null
+        @JvmStatic @Volatile private var pushNotificationsChannel: MethodChannel? = null
+
+        /**
+         * Events that arrived before [pushNotificationsChannel] was attached (e.g. a
+         * cold-start-on-notification-tap, where the broadcast fires before the Flutter engine
+         * exists). Buffered here and replayed once the channel becomes available, mirroring the
+         * iOS plugin's `pendingEvents` buffering.
+         */
+        @JvmStatic
+        private val pendingEvents = mutableListOf<Pair<String, Map<String, Any?>>>()
+
+        /**
+         * Send a push event to Flutter, or buffer it if the engine/channel isn't attached yet.
+         * Must be called on the main thread.
+         */
+        @JvmStatic
+        @Synchronized
+        fun sendOrQueueEvent(method: String, arguments: Map<String, Any?>) {
+            val channel = pushNotificationsChannel
+            if (channel != null) {
+                channel.invokeMethod(method, arguments)
+            } else {
+                pendingEvents.add(method to arguments)
+            }
+        }
+
+        @JvmStatic
+        @Synchronized
+        private fun attachChannel(channel: MethodChannel) {
+            pushNotificationsChannel = channel
+            if (pendingEvents.isEmpty()) return
+            val events = pendingEvents.toList()
+            pendingEvents.clear()
+            events.forEach { (method, arguments) -> channel.invokeMethod(method, arguments) }
+        }
+
+        @JvmStatic
+        @Synchronized
+        private fun detachChannel() {
+            pushNotificationsChannel = null
+        }
 
         /**
          * Forward a new FCM token to the Bluedot push module.
@@ -62,16 +102,14 @@ class BluedotPushPlugin : FlutterPlugin, MethodCallHandler {
             commandChannel = MethodChannel(binding.binaryMessenger, PUSH_COMMAND_CHANNEL)
             commandChannel!!.setMethodCallHandler(this)
         }
-        if (pushNotificationsChannel == null) {
-            pushNotificationsChannel = MethodChannel(binding.binaryMessenger, PUSH_EVENTS_CHANNEL)
-        }
+        attachChannel(MethodChannel(binding.binaryMessenger, PUSH_EVENTS_CHANNEL))
         context = binding.applicationContext
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         commandChannel?.setMethodCallHandler(null)
         commandChannel = null
-        pushNotificationsChannel = null
+        detachChannel()
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {

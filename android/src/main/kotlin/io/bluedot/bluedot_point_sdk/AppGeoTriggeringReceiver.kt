@@ -3,46 +3,32 @@ package io.bluedot.bluedot_point_sdk
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import au.com.bluedot.point.net.engine.*
 import au.com.bluedot.point.net.engine.event.*
-import io.flutter.plugin.common.MethodChannel.Result
 
 class AppGeoTriggeringReceiver : GeoTriggeringEventReceiver() {
 
   override fun onZoneInfoUpdate(context: Context) {
-    sendEvent("didUpdateZoneInfo", "", "")
+    sendEvent("didUpdateZoneInfo", "")
   }
 
   override fun onZoneEntryEvent(entryEvent: GeoTriggerEvent, context: Context) {
-    sendEvent("didEnterZone", "GeoTriggerEvent", entryEvent.toJson())
+    sendEvent("didEnterZone", entryEvent.toJson())
   }
 
   override fun onZoneExitEvent(exitEvent: GeoTriggerEvent, context: Context) {
-    sendEvent("didExitZone", "GeoTriggerEvent", exitEvent.toJson())
+    sendEvent("didExitZone", exitEvent.toJson())
   }
 
   override fun onZoneDwellEvent(dwellEvent: GeoTriggerEvent, context: Context) {
-    sendEvent("didDwellInZone", "GeoTriggerEvent", dwellEvent.toJson())
+    sendEvent("didDwellInZone", dwellEvent.toJson())
   }
 
-  // Use Dart to parse the json string and pass the resulting object to the
-  // client callback.
-  private fun sendEvent(eventName: String, modelName: String, jsonStr: String) {
+  // Decode natively so background launches do not depend on a Dart method
+  // handler being registered before PointSDK delivers an event.
+  private fun sendEvent(eventName: String, jsonStr: String) {
     Handler(Looper.getMainLooper()).post {
-      BluedotPointSdkPlugin.methodChannelGeoUtils?.invokeMethod("parseJson", listOf(modelName, jsonStr), object : Result {
-        override fun success(result: Any?) {
-          BluedotPointSdkPlugin.geoTriggeringChannel?.invokeMethod(eventName, result)
-        }
-        override fun error(
-          errorCode: String, errorMessage: String?,
-          errorDetails: Any?
-        ) {
-          Log.e("AppGeoTriggeringRecv", "[sendEvent] failed")
-        }
-
-        override fun notImplemented() {}
-      })
+      BluedotPointSdkPlugin.geoTriggeringChannel?.invokeMethod(eventName, JsonUtils.decodeJSON(jsonStr))
     }
   }
 }
