@@ -15,15 +15,15 @@ import com.rezolve.pushnotifications.toRezolvePushData
  *
  * ## Integration patterns
  *
- * ### Pattern A — automatic (recommended when not using @react-native-firebase/messaging)
+ * ### Pattern A — automatic (recommended when not using the firebase_messaging pub package)
  * No extra work needed. This service handles FCM automatically.
  *
- * ### Pattern B — @react-native-firebase/messaging
- * That library registers its own [FirebaseMessagingService] at priority 0, which pre-empts
- * this service. Forward messages to Bluedot from your JS handlers instead:
- * ```
- * messaging().onMessage(msg => PushNotifications.onMessageReceived(msg));
- * messaging().onTokenRefresh(token => PushNotifications.onNewFcmToken(token));
+ * ### Pattern B — firebase_messaging (pub.dev package)
+ * That plugin registers its own [FirebaseMessagingService] at priority 0, which pre-empts
+ * this service. Forward messages to Bluedot from your Dart handlers instead:
+ * ```dart
+ * FirebaseMessaging.onMessage.listen((msg) => PushNotifications.onMessageReceived(msg));
+ * FirebaseMessaging.instance.onTokenRefresh.listen((token) => PushNotifications.onNewFcmToken(token));
  * ```
  *
  * ### Pattern C — multiple push sources (e.g. Airship + Bluedot)

@@ -16,15 +16,15 @@
         </receiver>
 
         <!--
-            DefaultMessagingService: automatic FCM handler for Pattern A (no @react-native-firebase).
+            DefaultMessagingService: automatic FCM handler for Pattern A (no firebase_messaging).
 
             Registered at intent-filter priority -1. Any FirebaseMessagingService the consumer
             app registers without an explicit priority defaults to 0, which takes precedence.
             This service is never reached once the consumer registers their own.
 
-            Pattern B  - @react-native-firebase/messaging:
-            That library registers its own service at priority 0, pre-empting this one.
-            Forward messages to Bluedot via the JS bridge instead:
+            Pattern B  - firebase_messaging (pub.dev package):
+            That plugin registers its own service at priority 0, pre-empting this one.
+            Forward messages to Bluedot via the platform channel instead:
               PushNotifications.onMessageReceived(msg) and PushNotifications.onNewFcmToken(token).
 
             Pattern C  - multiple push sources (e.g. Airship + Bluedot):
