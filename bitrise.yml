@@ -1,0 +1,494 @@
+---
+format_version: '11'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: flutter
+workflows:
+  _deploy-setup:
+    description: |
+      Shared preflight for the release chain: checkout, pub.dev credentials,
+      tooling, and the version and release-note variables every later step reads.
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Set auth user for pub.dev
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            # create folder if not exists
+            mkdir -p ~/.config/dart
+
+            # save the credentials to a pub-credentials.json file for pub.dev to read from
+            umask 077
+            printf '%s' "$PUB_CREDENTIALS2026" > ~/.config/dart/pub-credentials.json
+    - script@1:
+        title: Install yq
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            # install yq
+            wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+
+            # give it permission to execute
+            chmod a+x /usr/local/bin/yq
+    - flutter-installer@1:
+        title: Flutter Install
+        inputs:
+        - is_update: 'false'
+        - installation_bundle_url: https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.41.7-stable.tar.xz
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            FLUTTER_PLUGIN_VERSION=$(yq ".version" "$PUBSPEC_YAML_FILE")
+
+            echo "Found plugin version ${FLUTTER_PLUGIN_VERSION}"
+
+            envman add --key FLUTTER_PLUGIN_VERSION --value "${FLUTTER_PLUGIN_VERSION}"
+        title: Set FLUTTER_PLUGIN_VERSION
+    - script@1:
+        title: Parse Release Notes
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            envman add --key RELEASE_NOTES --valuefile $RELEASE_NOTES_FILE
+
+            echo $RELEASE_NOTES
+    - set-env-var@0:
+        inputs:
+        - destination_keys: GITHUB_RELEASE_TAG
+        - value: v$FLUTTER_PLUGIN_VERSION
+        title: Set tag name
+  deploy-core:
+    description: |
+      Publishes bluedot_point_sdk to pub.dev on every push to main, then tags the
+      commit and opens the GitHub release. Idempotent: an already published
+      version and an existing tag are both skipped, so re-running is safe.
+    before_run:
+    - _deploy-setup
+    steps:
+    - script@1:
+        title: Publish core package if needed
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            # Skipped when this version is already published, so a main push that
+            # only bumps the push module does not fail here.
+            URL="https://pub.dev/api/packages/bluedot_point_sdk/versions/${FLUTTER_PLUGIN_VERSION}"
+
+            if curl -fsS -o /dev/null "$URL"; then
+              echo "bluedot_point_sdk ${FLUTTER_PLUGIN_VERSION} is already on pub.dev - skipping publish"
+            else
+              flutter pub publish -f
+            fi
+    - script@1:
+        title: Decide whether this version still needs a release
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            # Tag and release only when the version is live and the tag is missing,
+            # so a re-run after a partial failure still finishes the job, and a
+            # re-run after success does not fail on an existing tag.
+            TAGS=$(git ls-remote --tags origin "refs/tags/${GITHUB_RELEASE_TAG}")
+
+            if [ -n "$TAGS" ]; then
+              echo "tag ${GITHUB_RELEASE_TAG} already exists - skipping release"
+              NEEDED=false
+            elif curl -fsS -o /dev/null "https://pub.dev/api/packages/bluedot_point_sdk/versions/${FLUTTER_PLUGIN_VERSION}"; then
+              echo "bluedot_point_sdk ${FLUTTER_PLUGIN_VERSION} is live and untagged - releasing"
+              NEEDED=true
+            else
+              echo "bluedot_point_sdk ${FLUTTER_PLUGIN_VERSION} is not on pub.dev - skipping release"
+              NEEDED=false
+            fi
+
+            envman add --key CORE_RELEASE_NEEDED --value "$NEEDED"
+    - git-tag@1:
+        title: Tag for Github Release
+        run_if: '{{enveq "CORE_RELEASE_NEEDED" "true"}}'
+        inputs:
+        - tag: "$GITHUB_RELEASE_TAG"
+    - script@1:
+        title: Extract latest git commit from GitHub release
+        run_if: '{{enveq "CORE_RELEASE_NEEDED" "true"}}'
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            RELEASE_TAG_COMMIT=$(git rev-parse HEAD)
+            echo "Latest commit for Release tag: ${RELEASE_TAG_COMMIT}"
+
+            envman add --key RELEASE_TAG_COMMIT --value "${RELEASE_TAG_COMMIT}"
+    - github-release@0:
+        run_if: '{{enveq "CORE_RELEASE_NEEDED" "true"}}'
+        inputs:
+        - username: "$GITHUB_USERNAME"
+        - name: "$GITHUB_RELEASE_TAG"
+        - body: "$RELEASE_NOTES"
+        - draft: 'no'
+        - pre_release: 'yes'
+        - commit: "$RELEASE_TAG_COMMIT"
+        - tag: "$GITHUB_RELEASE_TAG"
+        - api_token: "$GITHUB_ACCESS_TOKEN"
+    - slack@3:
+        run_if: '{{enveq "CORE_RELEASE_NEEDED" "true"}}'
+        inputs:
+        - channel: ''
+        - emoji: ":tada:"
+        - from_username: PointSDK Flutter Plugin
+        - footer: ''
+        - webhook_url_on_error: "$SLACK_WEBHOOK"
+        - channel_on_error: ''
+        - text_on_error: ''
+        - emoji_on_error: ":sob:"
+        - from_username_on_error: PointSDK Flutter Plugin
+        - text: ''
+        - buttons: |
+            View App|${BITRISE_APP_URL}
+            View Build|${BITRISE_BUILD_URL}
+            Github Tag|https://github.com/Bluedot-Innovation/PointSDK-Flutter-Plugin/releases/tag/${GITHUB_RELEASE_TAG}
+        - pretext: "*:tada: PointSDK Flutter Plugin v$FLUTTER_PLUGIN_VERSION is published
+            to pub.dev to Github :tada:*"
+        - pretext_on_error: "*Oh no, Build Failed! :sob:*"
+        - webhook_url: "$SLACK_WEBHOOK"
+    after_run:
+    - _deploy-push
+    - _deploy-finish
+  _deploy-push:
+    description: |
+      Publishes bluedot_point_sdk_push when its own version is new. Chained after
+      deploy-core, so the core version it depends on is already published. Skips
+      without waiting when the push module version is already on pub.dev, which
+      is the usual case for a core-only release. Published from a copy outside the
+      repository - see the note on the publish step.
+    steps:
+    - script@1:
+        title: Check whether the push module needs publishing
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            VERSION=$(yq ".version" "$BITRISE_SOURCE_DIR/PointSDK-Flutter-Push/pubspec.yaml")
+
+            if [ -z "$VERSION" ]; then
+              echo "ERROR: could not parse the version from PointSDK-Flutter-Push/pubspec.yaml" >&2
+              exit 1
+            fi
+
+            echo "bluedot_point_sdk_push version: ${VERSION}"
+            envman add --key PUSH_MODULE_VERSION --value "${VERSION}"
+
+            # bluedot_point_sdk_push is versioned independently of the core, so it is
+            # often unchanged when the core is bumped. Skip rather than fail.
+            if curl -fsS -o /dev/null "https://pub.dev/api/packages/bluedot_point_sdk_push/versions/${VERSION}"; then
+              echo "bluedot_point_sdk_push ${VERSION} is already on pub.dev - nothing to publish"
+              envman add --key PUSH_PUBLISH_NEEDED --value "false"
+            else
+              echo "bluedot_point_sdk_push ${VERSION} is not on pub.dev yet"
+              envman add --key PUSH_PUBLISH_NEEDED --value "true"
+            fi
+    - script@1:
+        title: Wait for the core version this module requires
+        run_if: '{{enveq "PUSH_PUBLISH_NEEDED" "true"}}'
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            # pub resolves dependencies before validating a publish, so the core
+            # version this module requires has to be resolvable first. Wait on the
+            # constraint's floor, not on whatever version the core happens to be at.
+            PUSH_PUBSPEC="$BITRISE_SOURCE_DIR/PointSDK-Flutter-Push/pubspec.yaml"
+            REQUIRED=$(yq ".dependencies.bluedot_point_sdk" "$PUSH_PUBSPEC" | sed 's/^[^0-9]*//')
+
+            if [ -z "$REQUIRED" ]; then
+              echo "ERROR: could not parse the bluedot_point_sdk constraint from ${PUSH_PUBSPEC}" >&2
+              exit 1
+            fi
+
+            echo "bluedot_point_sdk_push requires bluedot_point_sdk ^${REQUIRED}"
+
+            URL="https://pub.dev/api/packages/bluedot_point_sdk/versions/${REQUIRED}"
+            DEADLINE=$(( $(date +%s) + 900 ))
+            DELAY=5
+
+            until curl -fsS -o /dev/null "$URL"; do
+              if [ "$(date +%s)" -ge "$DEADLINE" ]; then
+                echo "ERROR: bluedot_point_sdk ${REQUIRED} is still not available on pub.dev after 15 minutes" >&2
+                exit 1
+              fi
+              echo "waiting for bluedot_point_sdk ${REQUIRED} on pub.dev (next check in ${DELAY}s)..."
+              sleep "$DELAY"
+              if [ "$DELAY" -lt 60 ]; then
+                DELAY=$(( DELAY * 2 ))
+              fi
+            done
+
+            echo "bluedot_point_sdk ${REQUIRED} is available on pub.dev"
+    - script@1:
+        title: Dry run and publish push module
+        run_if: '{{enveq "PUSH_PUBLISH_NEEDED" "true"}}'
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            # Published from a copy outside the repository. The root .pubignore
+            # excludes PointSDK-Flutter-Push/ so the core package does not ship the
+            # submodule, and pub applies ancestor ignore rules - so publishing from
+            # inside that directory hides its own pubspec and fails validation with
+            # "The pubspec is hidden, probably by .gitignore or pubignore". Anchoring
+            # the pattern as /PointSDK-Flutter-Push/ does not help; copying is the
+            # only way to keep both the core exclusion and a publishable submodule.
+            PUBLISH_DIR=/tmp/publish-push
+            rm -rf "$PUBLISH_DIR"
+            cp -R "$BITRISE_SOURCE_DIR/PointSDK-Flutter-Push" "$PUBLISH_DIR"
+
+            cd "$PUBLISH_DIR"
+
+            flutter pub publish --dry-run
+            flutter pub publish -f
+    - slack@3:
+        run_if: '{{enveq "PUSH_PUBLISH_NEEDED" "true"}}'
+        inputs:
+        - channel: ''
+        - emoji: ":tada:"
+        - from_username: PointSDK Flutter Plugin
+        - footer: ''
+        - webhook_url_on_error: "$SLACK_WEBHOOK"
+        - channel_on_error: ''
+        - text_on_error: ''
+        - emoji_on_error: ":sob:"
+        - from_username_on_error: PointSDK Flutter Plugin
+        - text: ''
+        - buttons: |
+            View App|${BITRISE_APP_URL}
+            View Build|${BITRISE_BUILD_URL}
+        - pretext: "*:tada: bluedot_point_sdk_push v$PUSH_MODULE_VERSION is published
+            to pub.dev :tada:*"
+        - pretext_on_error: "*Oh no, Build Failed! :sob:*"
+        - webhook_url: "$SLACK_WEBHOOK"
+  _deploy-finish:
+    description: |
+      Tail of the release chain: save the cache and collect build artifacts.
+    steps:
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+  qa-release:
+    description: |
+      Builds project and runs tests.
+
+      Next steps:
+      - Check out [Getting started with Flutter apps](https://devcenter.bitrise.io/en/getting-started/getting-started-with-flutter-apps.html).
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - flutter-installer@0:
+        inputs:
+        - installation_bundle_url: https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.41.7-stable.tar.xz
+        - is_update: 'false'
+    - cache-pull@2: {}
+    - script@1:
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            function parse_yaml {
+               local prefix=$2
+               local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+               sed -ne "s|^\($s\):|\1|" \
+                    -e "s|^\($s\)\($w\)$s:$s[\"']\(.*\)[\"']$s\$|\1$fs\2$fs\3|p" \
+                    -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+               awk -F$fs '{
+                  indent = length($1)/2;
+                  vname[indent] = $2;
+                  for (i in vname) {if (i > indent) {delete vname[i]}}
+                  if (length($3) > 0) {
+                     vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+                     printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+                  }
+               }'
+            }
+
+            eval $(parse_yaml $PUBSPEC_YAML_FILE)
+
+            FLUTTER_PLUGIN_VERSION=$version
+
+            echo "Found plugin version ${FLUTTER_PLUGIN_VERSION}"
+
+            envman add --key FLUTTER_PLUGIN_VERSION --value "${FLUTTER_PLUGIN_VERSION}"
+        title: Set FLUTTER_PLUGIN_VERSION
+    - set-env-var@0:
+        inputs:
+        - destination_keys: GITHUB_RELEASE_TAG
+        - value: v$FLUTTER_PLUGIN_VERSION-pre+build.$BITRISE_BUILD_NUMBER
+        title: Set release tag name
+    - git-tag@1:
+        title: Tag for Github Release
+        inputs:
+        - tag: "$GITHUB_RELEASE_TAG"
+    - script@1:
+        inputs:
+        - content: "#!/usr/bin/env bash
+
+
+            # first delete MinApp folder if exists
+
+            rm -rf $MIN_APP_REPO_DIR
+
+
+            # clone MinApp repo\ 
+
+            git clone $GIT_MIN_APP_REPO $MIN_APP_REPO_DIR
+
+
+            cd $MIN_APP_REPO_DIR
+
+
+            git checkout main
+
+            git tag \"$GITHUB_RELEASE_TAG\"
+
+            git push origin \"$GITHUB_RELEASE_TAG\"\n"
+        title: Tag downstream Minimal App
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+    - slack@4:
+        inputs:
+        - channel: ''
+        - emoji: ":tada:"
+        - from_username: PointSDK Flutter Plugin
+        - footer: ''
+        - webhook_url_on_error: "$SLACK_WEBHOOK"
+        - channel_on_error: ''
+        - text_on_error: ''
+        - emoji_on_error: ":sob:"
+        - from_username_on_error: PointSDK Flutter Plugin
+        - text: ''
+        - buttons: |
+            View App|${BITRISE_APP_URL}
+            View Build|${BITRISE_BUILD_URL}
+            Github Tag|https://github.com/Bluedot-Innovation/PointSDK-Flutter-Plugin/releases/tag/${GITHUB_RELEASE_TAG}
+        - pretext: "*:tada: PointSDK Flutter Plugin $GITHUB_RELEASE_TAG is pushed to
+            Github :tada:*"
+        - pretext_on_error: "*Oh no, Build Failed! :sob:*"
+        - webhook_url: "$SLACK_WEBHOOK"
+  dry-run:
+    description: |
+      Validates both packages with dart pub publish --dry-run. Publishes nothing.
+      This workflow is the release gate: it must pass on the pull request before
+      deploy-core is allowed to publish, which is why deploy-core carries no dry
+      run of its own. Make it a required status check on pull requests into main
+      and dev/* in the repository's branch protection settings.
+    steps:
+    - activate-ssh-key@4: {}
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - flutter-installer@1:
+        inputs:
+        - is_update: 'false'
+        - installation_bundle_url: https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.41.7-stable.tar.xz
+    - script@1:
+        title: Install yq
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+
+            wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+            chmod a+x /usr/local/bin/yq
+    - script@1:
+        title: Check version parsing
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            # The release chain parses both pubspecs with yq and waits on the push
+            # module's dependency constraint. Fail here rather than mid-publish.
+            PUSH_PUBSPEC="$BITRISE_SOURCE_DIR/PointSDK-Flutter-Push/pubspec.yaml"
+
+            CORE_VERSION=$(yq ".version" "$PUBSPEC_YAML_FILE")
+            PUSH_VERSION=$(yq ".version" "$PUSH_PUBSPEC")
+            REQUIRED=$(yq ".dependencies.bluedot_point_sdk" "$PUSH_PUBSPEC" | sed 's/^[^0-9]*//')
+
+            for VALUE in "$CORE_VERSION" "$PUSH_VERSION" "$REQUIRED"; do
+              if [ -z "$VALUE" ] || [ "$VALUE" = "null" ]; then
+                echo "ERROR: a version or dependency constraint could not be parsed" >&2
+                exit 1
+              fi
+            done
+
+            echo "bluedot_point_sdk: ${CORE_VERSION}"
+            echo "bluedot_point_sdk_push: ${PUSH_VERSION}"
+            echo "bluedot_point_sdk_push requires bluedot_point_sdk ^${REQUIRED}"
+    - script@1:
+        title: Dry run - core package
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            flutter pub publish --dry-run
+    - script@1:
+        title: Dry run - push module
+        inputs:
+        - content: |-
+            #!/usr/bin/env bash
+            set -euo pipefail
+
+            # bluedot_point_sdk_push pins bluedot_point_sdk ^2.2.0. Until that version is
+            # on pub.dev, resolve the core from the local checkout, so this validates the
+            # package itself rather than failing on dependency resolution.
+            rm -rf /tmp/push-dry-run
+            cp -R "$BITRISE_SOURCE_DIR/PointSDK-Flutter-Push" /tmp/push-dry-run
+            cd /tmp/push-dry-run
+            printf '\ndependency_overrides:\n  bluedot_point_sdk:\n    path: %s\n' "$BITRISE_SOURCE_DIR" >> pubspec.yaml
+            flutter pub publish --dry-run
+    - cache-push@2: {}
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - is_enable_public_page: 'false'
+        - notify_user_groups: none
+meta:
+  bitrise.io:
+    stack: linux-docker-android-22.04
+app:
+  envs:
+  - opts:
+      is_expand: false
+    BITRISE_FLUTTER_PROJECT_LOCATION: "."
+  - opts:
+      is_expand: false
+    MIN_APP_REPO_DIR: Flutter-Minimal-Integration
+  - opts:
+      is_expand: false
+    GIT_MIN_APP_REPO: git@github.com:Bluedot-Innovation/Flutter-Minimal-Integration.git
+  - opts:
+      is_expand: false
+    RELEASE_NOTES_FILE: "./CHANGELOG.md"
+  - opts:
+      is_expand: false
+    PUBSPEC_YAML_FILE: "./pubspec.yaml"
+trigger_map:
+- push_branch: release/*
+  workflow: qa-release
+- push_branch: main
+  workflow: deploy-core
+- pull_request: "*"
+  workflow: dry-run

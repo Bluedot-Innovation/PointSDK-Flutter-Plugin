@@ -1,0 +1,75 @@
+group 'io.bluedot.bluedot_point_sdk_push'
+version '1.0.0'
+
+buildscript {
+    ext.kotlin_version = '2.3.0'
+    ext.sdk_version = '18.0.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.0.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    namespace 'io.bluedot.bluedot_point_sdk_push'
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    defaultConfig {
+        minSdk 29
+        compileSdk 36
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Firebase BOM version
+//
+// The consumer app is responsible for applying the google-services plugin and
+// placing google-services.json in their own app module. This library only
+// needs the firebase-messaging artifact on the compile classpath; it does NOT
+// need (or want) the google-services Gradle plugin.
+//
+// Override the BOM version from your app's build.gradle / gradle.properties:
+//   ext.firebaseBomVersion = '34.0.0'
+// ---------------------------------------------------------------------------
+def firebaseBomVersion = rootProject.hasProperty('firebaseBomVersion') ?
+        rootProject.property('firebaseBomVersion') : (project.hasProperty('firebaseBomVersion') ?
+        project.property('firebaseBomVersion') : '34.12.0')
+
+dependencies {
+    // Core Point SDK — must match the version used by the base plugin.
+    implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
+
+
+    // Push notifications module and its Firebase dependency.
+    // These are the ONLY place in the plugin ecosystem where these artifacts are declared,
+    // so they are only resolved for apps that add bluedot_point_sdk_push.
+    implementation "com.gitlab.bluedotio.android:point_sdk_push:$sdk_version"
+    implementation platform("com.google.firebase:firebase-bom:${firebaseBomVersion}")
+    implementation "com.google.firebase:firebase-messaging"
+}
+

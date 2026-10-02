@@ -1,0 +1,39 @@
+# Build outputs & caches
+build/
+.dart_tool/
+.pub/
+.pub-cache/
+
+# Flutter-generated files
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Android build artefacts
+**/android/.gradle
+**/android/local.properties
+**/android/captures/
+
+# iOS / Xcode artefacts
+**/ios/**/Pods/
+**/ios/**/DerivedData/
+**/ios/**/xcuserdata/
+**/ios/**/.symlinks/
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GeneratedPluginRegistrant.*
+
+# macOS
+.DS_Store
+._*
+
+# Misc
+*.log
+*.class
+
+

@@ -1,19 +1,20 @@
 group 'io.bluedot.bluedot_point_sdk'
-version '2.1.4'
+version '2.2.0'
 
 buildscript {
-    ext.kotlin_version = '1.8.10'
-    ext.sdk_version = '17.4.1'
+    ext.kotlin_version = '2.3.0'
+    ext.sdk_version = '18.0.0'
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.2.2'
+        classpath 'com.android.tools.build:gradle:9.0.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
+
 
 rootProject.allprojects {
     repositories {
@@ -32,7 +33,7 @@ android {
     namespace 'io.bluedot.bluedot_point_sdk'
     java {
         toolchain {
-            languageVersion = JavaLanguageVersion.of(17)
+            languageVersion = JavaLanguageVersion.of(21)
         }
     }
 
@@ -41,14 +42,11 @@ android {
     }
 
     defaultConfig {
-        minSdk 19
-        compileSdk 34
+        minSdk 29
+        compileSdk 36
     }
 }
 
 dependencies {
     implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
-
-    //NOTE: This is used when building with MavenLocal.
-    //implementation "com.github.Bluedot-Innovation:pointsdk:1262"
 }
