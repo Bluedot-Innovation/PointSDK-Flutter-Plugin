@@ -168,7 +168,8 @@ workflows:
       Publishes bluedot_point_sdk_push when its own version is new. Chained after
       deploy-core, so the core version it depends on is already published. Skips
       without waiting when the push module version is already on pub.dev, which
-      is the usual case for a core-only release.
+      is the usual case for a core-only release. Published from a copy outside the
+      repository - see the note on the publish step.
     steps:
     - script@1:
         title: Check whether the push module needs publishing
@@ -242,7 +243,18 @@ workflows:
             #!/usr/bin/env bash
             set -euo pipefail
 
-            cd "$BITRISE_SOURCE_DIR/PointSDK-Flutter-Push"
+            # Published from a copy outside the repository. The root .pubignore
+            # excludes PointSDK-Flutter-Push/ so the core package does not ship the
+            # submodule, and pub applies ancestor ignore rules - so publishing from
+            # inside that directory hides its own pubspec and fails validation with
+            # "The pubspec is hidden, probably by .gitignore or pubignore". Anchoring
+            # the pattern as /PointSDK-Flutter-Push/ does not help; copying is the
+            # only way to keep both the core exclusion and a publishable submodule.
+            PUBLISH_DIR=/tmp/publish-push
+            rm -rf "$PUBLISH_DIR"
+            cp -R "$BITRISE_SOURCE_DIR/PointSDK-Flutter-Push" "$PUBLISH_DIR"
+
+            cd "$PUBLISH_DIR"
 
             flutter pub publish --dry-run
             flutter pub publish -f
