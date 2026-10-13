@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'bluedot_point_sdk_platform_interface.dart';
 import 'tempo_builder.dart';
 import 'geo_triggering_builder.dart';
@@ -67,24 +69,6 @@ class BluedotPointSdk {
   /// in check-in activity log and via webhooks.
   Future<void> setCustomEventMetaData(Map<String, String> metadata) {
     return BluedotPointSdkPlatform.instance.setCustomEventMetaData(metadata);
-  }
-
-  /// By default, PointSDK uses `ic_stat_name` icon in res/drawable resources
-  /// for GeoTriggering and Tempo services foreground notification icons.
-  ///
-  /// Use this method to assign a custom notification icon for Android
-  /// foreground notification. If [icon] is null or doesn't exist in android's
-  /// res/drawable or res/mipmap, the default one `ic_stat_name` will be used.
-  /// If also not available, then app launcher icon is used.
-  ///
-  /// ### IMPORTANT:
-  /// Flutter defaults `shrinkResources` to true for release builds, and the
-  /// [icon] may be deleted from release builds if it's not referenced directly
-  /// from code at build time. Follow Android's documentation
-  /// [keep-resources](https://developer.android.com/build/shrink-code#keep-resources)
-  /// to specify which resources to keep.
-  Future<void> setNotificationIcon(String icon) {
-    return BluedotPointSdkPlatform.instance.setNotificationIcon(icon);
   }
 
   /// Disable or re-enable a specific zone by its [zoneId].
@@ -161,6 +145,48 @@ class BluedotPointSdk {
         .backgroundLocationAccessForWhileUsing(value);
   }
 
+  /// Android only. No-op on iOS.
+  ///
+  /// The Point SDK no longer declares, starts, or displays its own foreground
+  /// service. Your app is responsible for implementing, starting and
+  /// foregrounding its own `Service` (with its own persistent notification).
+  /// Call this once that service has successfully called `startForeground()`
+  /// to link it to the Point SDK:
+  ///
+  /// - GeoTriggering always runs via a background worker, with or without a
+  ///   linked foreground service — linking it is optional and only reduces
+  ///   location-update latency.
+  /// - Tempo __requires__ a linked foreground service in order to start.
+  ///   Calling [TempoBuilder.start] with none linked fails synchronously.
+  ///
+  /// If the linked foreground service later stops ([unlinkForegroundService]
+  /// is called, or the service process is killed) while Tempo is tracking,
+  /// Tempo stops and reports it asynchronously via the
+  /// `tempoTrackingStoppedWithError` event with
+  /// `isForegroundServiceNotLinked: true`.
+  ///
+  /// There is a single, shared link state, not one per feature — if your app
+  /// uses both GeoTriggering and Tempo, share one foreground service and one
+  /// link for both.
+  Future<void> linkForegroundService() {
+    if (Platform.isAndroid) {
+      return BluedotPointSdkPlatform.instance.linkForegroundService();
+    }
+    return Future.value();
+  }
+
+  /// Android only. No-op on iOS.
+  ///
+  /// Unlinks the foreground service previously linked via
+  /// [linkForegroundService]. Call this when your foreground service is
+  /// stopping, e.g. from its `onDestroy()`.
+  Future<void> unlinkForegroundService() {
+    if (Platform.isAndroid) {
+      return BluedotPointSdkPlatform.instance.unlinkForegroundService();
+    }
+    return Future.value();
+  }
+
 }
 
 class GeoTriggeringEvents {
@@ -171,6 +197,15 @@ class GeoTriggeringEvents {
 }
 
 class TempoEvents {
+  /// Fired when Tempo stops because of an error.
+  ///
+  /// On Android, the event arguments include `code`, `message` and `details`.
+  /// If Tempo stopped because the linked foreground service went away mid
+  /// session (see [BluedotPointSdk.linkForegroundService]), the arguments
+  /// also include `isForegroundServiceNotLinked: true` — handle this
+  /// explicitly if your app uses Tempo, e.g. by re-linking a foreground
+  /// service and restarting Tempo, or by updating the UI to reflect that
+  /// tracking has stopped.
   static const tempoTrackingStoppedWithError = 'tempoTrackingStoppedWithError';
   static const tempoTrackingDidUpdate = 'tempoTrackingDidUpdate';
 }
