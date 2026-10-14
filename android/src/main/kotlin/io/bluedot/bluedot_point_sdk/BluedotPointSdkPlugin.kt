@@ -155,7 +155,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
         serviceManager.linkForegroundService()
       }
       result.success(null)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       result.error("linkForegroundService failed", e.message, e.toString())
     }
   }
@@ -167,7 +167,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
         serviceManager.unlinkForegroundService()
       }
       result.success(null)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       result.error("unlinkForegroundService failed", e.message, e.toString())
     }
   }

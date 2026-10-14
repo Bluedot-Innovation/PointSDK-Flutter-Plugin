@@ -20,13 +20,17 @@ import au.com.bluedot.point.net.engine.ServiceManager
  *   startForeground(NOTIFICATION_ID, buildNotification())
  *   try {
  *     BluedotForegroundServiceLinker.link(applicationContext)
- *   } catch (e: Exception) {
+ *   } catch (e: Throwable) {
  *     // handle link failure
  *   }
  * }
  *
  * override fun onDestroy() {
- *   BluedotForegroundServiceLinker.unlink(applicationContext)
+ *   try {
+ *     BluedotForegroundServiceLinker.unlink(applicationContext)
+ *   } catch (e: Throwable) {
+ *     // handle unlink failure
+ *   }
  *   super.onDestroy()
  * }
  * ```
@@ -40,7 +44,7 @@ import au.com.bluedot.point.net.engine.ServiceManager
  */
 object BluedotForegroundServiceLinker {
   @JvmStatic
-  @Throws(Exception::class)
+  @Throws(Throwable::class)
   fun link(context: Context) {
     val serviceManager = ServiceManager.getInstance(context)
     if (!serviceManager.isForegroundServiceLinked) {
@@ -49,7 +53,7 @@ object BluedotForegroundServiceLinker {
   }
 
   @JvmStatic
-  @Throws(Exception::class)
+  @Throws(Throwable::class)
   fun unlink(context: Context) {
     val serviceManager = ServiceManager.getInstance(context)
     if (serviceManager.isForegroundServiceLinked) {
