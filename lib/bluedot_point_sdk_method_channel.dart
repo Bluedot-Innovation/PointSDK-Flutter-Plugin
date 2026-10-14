@@ -76,6 +76,12 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
     await methodChannel.invokeMethod('unlinkForegroundService');
   }
 
+  /// Android only. Returns whether a foreground service is currently linked.
+  Future<bool> isForegroundServiceLinked() async {
+    final isForegroundServiceLinked = await methodChannel.invokeMethod('isForegroundServiceLinked');
+    return isForegroundServiceLinked;
+  }
+
   Future<void> setZoneDisableByApplication(String zoneId, bool disable) async {
     await methodChannel.invokeMethod('setZoneDisableByApplication', {'zoneId': zoneId, 'disable': disable});
   }

@@ -168,6 +168,10 @@ class BluedotPointSdk {
   /// There is a single, shared link state, not one per feature — if your app
   /// uses both GeoTriggering and Tempo, share one foreground service and one
   /// link for both.
+  ///
+  /// This call is idempotent — calling it while already linked (including a
+  /// link made via the native `BluedotForegroundServiceLinker`) is a no-op
+  /// rather than an error.
   Future<void> linkForegroundService() {
     if (Platform.isAndroid) {
       return BluedotPointSdkPlatform.instance.linkForegroundService();
@@ -180,11 +184,27 @@ class BluedotPointSdk {
   /// Unlinks the foreground service previously linked via
   /// [linkForegroundService]. Call this when your foreground service is
   /// stopping, e.g. from its `onDestroy()`.
+  ///
+  /// [linkForegroundService] and [unlinkForegroundService] are both
+  /// idempotent — calling [linkForegroundService] while already linked, or
+  /// [unlinkForegroundService] while not linked, is a no-op rather than an
+  /// error.
   Future<void> unlinkForegroundService() {
     if (Platform.isAndroid) {
       return BluedotPointSdkPlatform.instance.unlinkForegroundService();
     }
     return Future.value();
+  }
+
+  /// Android only. Always returns `false` on iOS.
+  ///
+  /// Returns whether a foreground service is currently linked via
+  /// [linkForegroundService].
+  Future<bool> isForegroundServiceLinked() {
+    if (Platform.isAndroid) {
+      return BluedotPointSdkPlatform.instance.isForegroundServiceLinked();
+    }
+    return Future.value(false);
   }
 
 }

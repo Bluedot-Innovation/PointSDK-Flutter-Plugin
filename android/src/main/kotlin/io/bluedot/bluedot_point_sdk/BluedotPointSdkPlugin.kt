@@ -70,6 +70,7 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       "setZoneDisableByApplication" -> setZoneDisableByApplication(call)
       "linkForegroundService" -> linkForegroundService(result)
       "unlinkForegroundService" -> unlinkForegroundService(result)
+      "isForegroundServiceLinked" -> result.success(serviceManager.isForegroundServiceLinked)
       "reset" -> reset(result)
       "getInstallRef" -> result.success(serviceManager.installRef)
       "getSDKVersion" -> result.success(serviceManager.sdkVersion)
@@ -148,7 +149,11 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
 
   private fun linkForegroundService(result: Result) {
     try {
-      serviceManager.linkForegroundService()
+      // Idempotent: a link already in place (e.g. from a previous call, or from the native
+      // BluedotForegroundServiceLinker) is left as-is rather than re-linked.
+      if (!serviceManager.isForegroundServiceLinked) {
+        serviceManager.linkForegroundService()
+      }
       result.success(null)
     } catch (e: Exception) {
       result.error("linkForegroundService failed", e.message, e.toString())
@@ -157,7 +162,10 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
 
   private fun unlinkForegroundService(result: Result) {
     try {
-      serviceManager.unlinkForegroundService()
+      // Idempotent: unlinking when nothing is linked is a no-op rather than an error.
+      if (serviceManager.isForegroundServiceLinked) {
+        serviceManager.unlinkForegroundService()
+      }
       result.success(null)
     } catch (e: Exception) {
       result.error("unlinkForegroundService failed", e.message, e.toString())

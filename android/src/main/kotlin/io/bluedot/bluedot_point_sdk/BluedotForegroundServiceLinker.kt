@@ -32,17 +32,36 @@ import au.com.bluedot.point.net.engine.ServiceManager
  * ```
  *
  * No additional `point_sdk_android` dependency is required in the host app's `build.gradle`.
+ *
+ * [link] and [unlink] are idempotent: calling [link] while already linked, or [unlink] while
+ * not linked, is a no-op rather than an error, since there is a single, shared link state
+ * (not one per feature) and callers (including the Dart API and this native helper) could
+ * otherwise race each other into an unbalanced state.
  */
 object BluedotForegroundServiceLinker {
   @JvmStatic
   @Throws(Exception::class)
   fun link(context: Context) {
-    ServiceManager.getInstance(context).linkForegroundService()
+    val serviceManager = ServiceManager.getInstance(context)
+    if (!serviceManager.isForegroundServiceLinked) {
+      serviceManager.linkForegroundService()
+    }
   }
 
   @JvmStatic
   @Throws(Exception::class)
   fun unlink(context: Context) {
-    ServiceManager.getInstance(context).unlinkForegroundService()
+    val serviceManager = ServiceManager.getInstance(context)
+    if (serviceManager.isForegroundServiceLinked) {
+      serviceManager.unlinkForegroundService()
+    }
+  }
+
+  /**
+   * Returns whether a foreground service is currently linked to the Point SDK (see [link]).
+   */
+  @JvmStatic
+  fun isForegroundServiceLinked(context: Context): Boolean {
+    return ServiceManager.getInstance(context).isForegroundServiceLinked
   }
 }
