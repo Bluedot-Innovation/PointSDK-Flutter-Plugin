@@ -1,5 +1,7 @@
 package io.bluedot.bluedot_point_sdk
 
+import android.os.Handler
+import android.os.Looper
 import au.com.bluedot.point.error.CustomEventMetaDataSetError
 import au.com.bluedot.point.net.engine.*
 import au.com.bluedot.point.net.engine.ZoneInfo
@@ -8,6 +10,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.util.concurrent.atomic.AtomicBoolean
 
 /** BluedotPointSdkPlugin */
 class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
@@ -127,10 +130,18 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     // Use the onStopped overload so the Dart Future only resolves once Tempo has fully
     // stopped (e.g. TempoService.isRunning() is guaranteed false), matching the semantics
     // callers need to safely tear down a foreground service that was only linked for Tempo.
+    //
+    // onStopped may be invoked from a background dispatcher, so the reply is marshalled to
+    // the main looper (as AppGeoTriggeringReceiver does for its events). A reply-once guard
+    // also protects against TempoService.stop() returning a synchronous error and onStopped
+    // still firing later, which would otherwise submit a second reply on the same result.
+    val replied = AtomicBoolean(false)
     val error: BDError? = TempoService.stop {
-      result.success(null)
+      if (replied.compareAndSet(false, true)) {
+        Handler(Looper.getMainLooper()).post { result.success(null) }
+      }
     }
-    if (error != null) {
+    if (error != null && replied.compareAndSet(false, true)) {
       handleError(error, result)
     }
   }
