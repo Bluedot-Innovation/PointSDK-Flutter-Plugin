@@ -17,8 +17,8 @@ Bluedot Canvas. It is optional — the core `bluedot_point_sdk` package does not
 
 ```yaml
 dependencies:
-  bluedot_point_sdk: ^2.2.0
-  bluedot_point_sdk_push: ^1.0.0
+  bluedot_point_sdk: ^3.0.0
+  bluedot_point_sdk_push: ^2.0.0
 ```
 
 ---
