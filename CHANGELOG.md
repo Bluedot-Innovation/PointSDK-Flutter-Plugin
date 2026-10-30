@@ -11,6 +11,7 @@
   - There is a single, shared link state (not one per feature) — apps using both GeoTriggering and Tempo should share one foreground service/link.
   - Added a native-Android helper, `io.bluedot.bluedot_point_sdk.BluedotForegroundServiceLinker` (with `link(context)` / `unlink(context)`, both idempotent, and `isForegroundServiceLinked(context)`), exposed by the plugin for your app's own foreground `Service` to call directly. Since the plugin already depends on the Point SDK internally, your app does **not** need to add its own `point_sdk_android` Gradle dependency just to link/unlink - avoiding a second SDK version to keep in sync.
   - See the updated example app (`example/lib/geo_triggering_page.dart`, `example/lib/tempo_page.dart`, and `example/android/app/src/main/kotlin/.../BluedotTrackingService.kt`) for a reference implementation of an app-owned foreground service using `BluedotForegroundServiceLinker`.
+  - Fixed an Android crash risk where `stopTempoTracking()` could reply twice on the same `MethodChannel` result (once synchronously on error, once from the Tempo-stopped callback, which may fire on a background thread).
 
 ## 2.2.0
 - Updated to iOS PointSDK v18.1.0.
