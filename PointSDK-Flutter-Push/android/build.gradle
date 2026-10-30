@@ -15,34 +15,12 @@ buildscript {
     }
 }
 
-// DEV ONLY — Android Point SDK 19.0.0 hasn't been publicly released to jitpack yet. Until
-// it is, resolve an internal release-candidate build from Bluedot's private GitLab Maven
-// package registry instead (see the dependencies below). Provide the registry token via
-// `gitlabPrivateToken=<token>` in this project's `android/local.properties` (already
-// git-ignored, so it is never committed) — or pass it as a Gradle project property
-// (`-PgitlabPrivateToken=<token>`). Remove this block once 19.0.0 is published.
-def localProperties = new Properties()
-def localPropertiesFile = rootProject.file('local.properties')
-if (localPropertiesFile.exists()) {
-    localPropertiesFile.withInputStream { localProperties.load(it) }
-}
-
 rootProject.allprojects {
     repositories {
         mavenLocal()
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
-        maven {
-            url "https://gitlab.com/api/v4/projects/14682665/packages/maven"
-            credentials(HttpHeaderCredentials) {
-                name "Private-Token"
-                value localProperties.getProperty('gitlabPrivateToken') ?: project.findProperty('gitlabPrivateToken') ?: ''
-            }
-            authentication {
-                header(HttpHeaderAuthentication)
-            }
-        }
     }
 }
 
@@ -83,17 +61,8 @@ def firebaseBomVersion = rootProject.hasProperty('firebaseBomVersion') ?
         project.property('firebaseBomVersion') : '34.12.0')
 
 dependencies {
-    // Official public release — restore these two lines once Android Point SDK 19.0.0 is
-    // published to jitpack, and remove the two "DEV ONLY" lines below:
-    // implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
-    // implementation "com.gitlab.bluedotio.android:point_sdk_push:$sdk_version"
-
-    // DEV ONLY — internal release-candidate build of Point SDK 19.0.0 (core + push
-    // notifications modules), resolved from Bluedot's private GitLab Maven package
-    // registry (see repository config above). Must match the release-candidate build
-    // number used by the base plugin (android/build.gradle).
-    implementation 'au.com.bluedot:pointsdk:1380190974'
-    implementation 'au.com.bluedot:pushnotifications:1380190974'
+    implementation "com.gitlab.bluedotio.android:point_sdk_android:$sdk_version"
+    implementation "com.gitlab.bluedotio.android:point_sdk_push:$sdk_version"
 
     implementation platform("com.google.firebase:firebase-bom:${firebaseBomVersion}")
     implementation "com.google.firebase:firebase-messaging"
