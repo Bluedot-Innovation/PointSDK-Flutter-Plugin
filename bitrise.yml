@@ -38,7 +38,7 @@ workflows:
         title: Flutter Install
         inputs:
         - is_update: 'false'
-        - installation_bundle_url: https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.41.7-stable.tar.xz
+        - installation_bundle_url: https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.44.0-stable.tar.xz
     - script@1:
         inputs:
         - content: |-
@@ -298,7 +298,7 @@ workflows:
     - git-clone@8: {}
     - flutter-installer@0:
         inputs:
-        - installation_bundle_url: https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.41.7-stable.tar.xz
+        - installation_bundle_url: https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.44.0-stable.tar.xz
         - is_update: 'false'
     - cache-pull@2: {}
     - script@1:
@@ -403,7 +403,7 @@ workflows:
     - flutter-installer@1:
         inputs:
         - is_update: 'false'
-        - installation_bundle_url: https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.41.7-stable.tar.xz
+        - installation_bundle_url: https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.44.0-stable.tar.xz
     - script@1:
         title: Install yq
         inputs:

@@ -1,5 +1,12 @@
 # `bluedot_point_sdk_push` release notes
 
+## 2.0.0
+
+- Updated the iOS PointSDK dependency to 19.0.0.
+- **Breaking:** The iOS plugin is now distributed only through Swift Package Manager; the podspec and CocoaPods registration bridge have been removed.
+- **Breaking:** Flutter 3.44.0 or newer and `bluedot_point_sdk ^3.0.0` are required.
+- Preserved the existing APNs registration and host-owned notification forwarding APIs.
+
 ## 1.0.0
 
 - Initial release — PointSDK push notifications for Flutter on Android and iOS, including

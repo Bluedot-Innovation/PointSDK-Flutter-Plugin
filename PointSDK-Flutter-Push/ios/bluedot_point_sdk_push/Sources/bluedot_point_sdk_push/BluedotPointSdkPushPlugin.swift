@@ -3,14 +3,13 @@ import Flutter
 import UIKit
 import UserNotifications
 
-public final class SwiftBluedotPointSdkPushPlugin: NSObject,
+public final class BluedotPointSdkPushPlugin: NSObject,
     FlutterPlugin,
     FlutterApplicationLifeCycleDelegate {
     private static let commandChannelName = "bluedot_point_flutter/push_sdk"
     private static let eventsChannelName = "bluedot_point_flutter/push_notification_events"
 
-    /// The registered plugin instance, used by the forward-in entry points below.
-    private static var current: SwiftBluedotPointSdkPushPlugin?
+    private static var current: BluedotPointSdkPushPlugin?
 
     private let eventsChannel: FlutterMethodChannel
     private var isListenerReady = false
@@ -31,30 +30,14 @@ public final class SwiftBluedotPointSdkPushPlugin: NSObject,
             name: eventsChannelName,
             binaryMessenger: registrar.messenger()
         )
-        let instance = SwiftBluedotPointSdkPushPlugin(eventsChannel: eventsChannel)
+        let instance = BluedotPointSdkPushPlugin(eventsChannel: eventsChannel)
 
         registrar.addMethodCallDelegate(instance, channel: commandChannel)
-        // Needed for the APNs device-token callback below. Notification presentation and taps
-        // are deliberately left to the host application — see the forward-in API.
         registrar.addApplicationDelegate(instance)
 
         current = instance
     }
 
-    // MARK: - Forward-in API for the host application
-    //
-    // Flutter forwards `UNUserNotificationCenterDelegate` callbacks to *every* registered plugin
-    // with the *same* completion handler, so a plugin implementing them can complete a handler
-    // that the host app or another plugin completes as well. The host app therefore owns
-    // `userNotificationCenter(_:willPresent:)` and `userNotificationCenter(_:didReceive:)` and
-    // forwards to PointSDK through these methods. It also owns the presentation options, so a
-    // notification belonging to another provider keeps whatever presentation the app chooses.
-
-    /// Forwards a notification received in the foreground to PointSDK, and emits the
-    /// `onNotificationReceived` event to Dart when PointSDK owns the notification.
-    ///
-    /// Call from `userNotificationCenter(_:willPresent:withCompletionHandler:)`.
-    /// - Returns: `true` when PointSDK handled the notification.
     @objc
     @discardableResult
     public static func handleForegroundNotification(_ notification: UNNotification) -> Bool {
@@ -65,10 +48,6 @@ public final class SwiftBluedotPointSdkPushPlugin: NSObject,
         return handled
     }
 
-    /// Forwards a notification tap to PointSDK, and emits the `onNotificationClicked` event to
-    /// Dart when PointSDK owns the notification.
-    ///
-    /// Call from `userNotificationCenter(_:didReceive:withCompletionHandler:)`.
     @objc
     public static func handleNotificationResponse(_ response: UNNotificationResponse) {
         BDLocationManager.instance().pushNotifications.handleResponse(response)
@@ -98,7 +77,6 @@ public final class SwiftBluedotPointSdkPushPlugin: NSObject,
             pendingEvents.removeAll()
             result(nil)
         case "onNewFcmToken", "onMessageReceived":
-            // Android-only APIs are intentionally harmless in shared Dart code.
             result(nil)
         default:
             result(FlutterMethodNotImplemented)

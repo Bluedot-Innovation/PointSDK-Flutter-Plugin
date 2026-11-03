@@ -1,5 +1,12 @@
 # Flutter Bluedot Point SDK Plugin release notes
 
+## 3.0.0
+- Updated the iOS PointSDK dependency to 19.0.0.
+- **Breaking:** The iOS plugin is now distributed only through Swift Package Manager; the podspec and CocoaPods registration bridge have been removed.
+- **Breaking:** Flutter 3.44.0 or newer is required.
+- iOS 15.0 remains the minimum deployment target.
+- Pair with `bluedot_point_sdk_push 2.0.0` when push notification support is required.
+
 ## 2.2.0
 - Updated to iOS PointSDK v18.1.0.
 - Added iOS support to the optional `bluedot_point_sdk_push` package, including APNs registration, foreground delivery, notification-click events, and Dart listener buffering.

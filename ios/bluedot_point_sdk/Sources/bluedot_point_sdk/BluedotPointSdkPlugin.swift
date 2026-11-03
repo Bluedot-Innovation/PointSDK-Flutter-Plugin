@@ -1,8 +1,9 @@
 import Flutter
 import UIKit
 import BDPointSDK
+import BluedotPointSdkObjC
 
-public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
+public class BluedotPointSdkPlugin: NSObject, FlutterPlugin {
 
     private var methodChannel: FlutterMethodChannel?
     private var geoTriggeringMethodChannel: FlutterMethodChannel?
@@ -26,7 +27,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
         let geoTriggeringMethodChannel = FlutterMethodChannel(name: geoTriggeringChannel, binaryMessenger: registrar.messenger())
         let tempoMethodChannel = FlutterMethodChannel(name: tempoChannel, binaryMessenger: registrar.messenger())
         let bluedotServiceMethodChannel = FlutterMethodChannel(name: bluedotServiceChannel, binaryMessenger: registrar.messenger())
-        let instance = SwiftBluedotPointSdkPlugin()
+        let instance = BluedotPointSdkPlugin()
         instance.methodChannel = channel
         instance.geoTriggeringMethodChannel = geoTriggeringMethodChannel
         instance.tempoMethodChannel = tempoMethodChannel
@@ -134,7 +135,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
     private func setCustomEventMetaData(_ call: FlutterMethodCall, _ result: FlutterResult) {
         if let args = call.arguments as? [String: String] {
         do {
-            try ObjC.catchException {
+            try BluedotPointSdkExceptionCatcher.catchException {
                 BDLocationManager.instance().setCustomEventMetaData(args)
             }
             result(nil)
@@ -236,7 +237,7 @@ public class SwiftBluedotPointSdkPlugin: NSObject, FlutterPlugin {
     }
 }
 
-extension SwiftBluedotPointSdkPlugin: BDPGeoTriggeringEventDelegate {
+extension BluedotPointSdkPlugin: BDPGeoTriggeringEventDelegate {
 
     public func didUpdateZoneInfo() {
         sendEvent(eventName: "didUpdateZoneInfo", jsonStr: "")
@@ -262,7 +263,7 @@ extension SwiftBluedotPointSdkPlugin: BDPGeoTriggeringEventDelegate {
     }
 }
 
-extension SwiftBluedotPointSdkPlugin: BDPTempoTrackingDelegate {
+extension BluedotPointSdkPlugin: BDPTempoTrackingDelegate {
     public func didStopTrackingWithError(_ error: Error!) {
         self.tempoMethodChannel?.invokeMethod("tempoTrackingStoppedWithError", arguments: errorToDict(error))
     }
@@ -282,7 +283,7 @@ extension SwiftBluedotPointSdkPlugin: BDPTempoTrackingDelegate {
     }
 }
 
-extension SwiftBluedotPointSdkPlugin: BDPBluedotServiceDelegate {
+extension BluedotPointSdkPlugin: BDPBluedotServiceDelegate {
     public func bluedotServiceDidReceiveError(_ error: Error!) {
         self.bluedotServiceMethodChannel?.invokeMethod("onBluedotServiceError", arguments: errorToDict(error))
     }
