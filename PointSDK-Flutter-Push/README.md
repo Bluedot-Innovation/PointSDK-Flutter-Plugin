@@ -12,9 +12,12 @@ PointSDK push notifications. It is versioned independently of the core plugin.
 
 ```yaml
 dependencies:
-  bluedot_point_sdk: ^2.2.0
-  bluedot_point_sdk_push: ^1.0.0
+  bluedot_point_sdk: ^3.0.0
+  bluedot_point_sdk_push: ^2.0.0
 ```
+
+On iOS, both packages are distributed through Swift Package Manager. Apps may
+continue using CocoaPods for unrelated Flutter plugins.
 
 ## Usage
 
@@ -67,10 +70,10 @@ for the full setup, including the three Android FCM integration patterns.
 
 ## Requirements
 
-- Dart 3.0 or later, Flutter 3.0 or later
+- Dart 3.0 or later, Flutter 3.44.0 or later
 - iOS 15.0 or later
 - Android API 29 or later
-- `bluedot_point_sdk` 2.2.0 or later
+- `bluedot_point_sdk` 3.0.0 or later
 
 ## Support
 

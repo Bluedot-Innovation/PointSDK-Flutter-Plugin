@@ -17,9 +17,13 @@ Bluedot Canvas. It is optional — the core `bluedot_point_sdk` package does not
 
 ```yaml
 dependencies:
-  bluedot_point_sdk: ^2.2.0
-  bluedot_point_sdk_push: ^1.0.0
+  bluedot_point_sdk: ^3.0.0
+  bluedot_point_sdk_push: ^2.0.0
 ```
+
+Flutter 3.44.0 or newer is required. The iOS implementations of both Bluedot
+plugins are supplied through Swift Package Manager. CocoaPods may remain in the
+application for unrelated plugins.
 
 ---
 
@@ -187,8 +191,9 @@ if (status.isGranted || status.isProvisional) {
 ### 4.4 Build
 
 ```bash
+flutter config --enable-swift-package-manager
+flutter clean
 flutter pub get
-cd ios && pod install && cd ..
 flutter run
 ```
 

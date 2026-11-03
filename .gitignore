@@ -42,6 +42,11 @@ out/
 .pub/
 /build/
 
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
 # Android related
 **/android/.gradle
 **/android/captures/
