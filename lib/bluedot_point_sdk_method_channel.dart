@@ -40,9 +40,8 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
     return stopGeoTriggering;
   }
 
-  Future<void> androidStartGeoTriggering(String? channelId, String? channelName, String? title, String? content, int? notificationId) async {
-    final arguments = {'channelId': channelId, 'channelName': channelName, 'title': title, 'content': content, 'notificationId': notificationId};
-    final androidStartGeoTriggering = await methodChannel.invokeMethod('androidStartGeoTriggering', arguments);
+  Future<void> androidStartGeoTriggering() async {
+    final androidStartGeoTriggering = await methodChannel.invokeMethod('androidStartGeoTriggering');
     return androidStartGeoTriggering;
   }
 
@@ -51,9 +50,8 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
     return iOSStartTempoTracking;
   }
 
-  Future<void> androidStartTempoTracking(String destinationId, String channelId, String channelName, String title, String content, int? notificationId) async {
-    final arguments = {'destinationId': destinationId, 'channelId': channelId, 'channelName': channelName, 'title': title, 'content': content, 'notificationId': notificationId};
-    final androidStartTempoTracking = await methodChannel.invokeMethod('androidStartTempoTracking', arguments);
+  Future<void> androidStartTempoTracking(String destinationId) async {
+    final androidStartTempoTracking = await methodChannel.invokeMethod('androidStartTempoTracking', {'destinationId': destinationId});
     return androidStartTempoTracking;
   }
 
@@ -66,8 +64,22 @@ class MethodChannelBluedotPointSdk extends BluedotPointSdkPlatform {
     await methodChannel.invokeMethod('setCustomEventMetaData', metadata);
   }
 
-  Future<void> setNotificationIcon(String icon) async {
-    await methodChannel.invokeMethod('setNotificationIcon', {'icon' : icon});
+  /// Android only. Links the foreground service that the host app has already
+  /// started and foregrounded to the Point SDK.
+  Future<void> linkForegroundService() async {
+    await methodChannel.invokeMethod('linkForegroundService');
+  }
+
+  /// Android only. Unlinks the foreground service previously linked via
+  /// [linkForegroundService].
+  Future<void> unlinkForegroundService() async {
+    await methodChannel.invokeMethod('unlinkForegroundService');
+  }
+
+  /// Android only. Returns whether a foreground service is currently linked.
+  Future<bool> isForegroundServiceLinked() async {
+    final isForegroundServiceLinked = await methodChannel.invokeMethod('isForegroundServiceLinked');
+    return isForegroundServiceLinked;
   }
 
   Future<void> setZoneDisableByApplication(String zoneId, bool disable) async {

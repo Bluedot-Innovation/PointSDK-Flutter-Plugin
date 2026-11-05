@@ -1,9 +1,9 @@
 group 'io.bluedot.bluedot_point_sdk'
-version '2.2.0'
+version '3.0.0'
 
 buildscript {
     ext.kotlin_version = '2.3.0'
-    ext.sdk_version = '18.0.0'
+    ext.sdk_version = '19.0.0'
     repositories {
         google()
         mavenCentral()

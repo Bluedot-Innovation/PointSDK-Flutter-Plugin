@@ -1,14 +1,7 @@
 package io.bluedot.bluedot_point_sdk
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.graphics.Color
-import android.os.Build
-import androidx.core.app.NotificationCompat
+import android.os.Handler
+import android.os.Looper
 import au.com.bluedot.point.error.CustomEventMetaDataSetError
 import au.com.bluedot.point.net.engine.*
 import au.com.bluedot.point.net.engine.ZoneInfo
@@ -17,6 +10,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.util.concurrent.atomic.AtomicBoolean
 
 /** BluedotPointSdkPlugin */
 class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
@@ -38,8 +32,6 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
 
   private var channel: MethodChannel? = null
   private lateinit var serviceManager: ServiceManager
-  private lateinit var context: Context
-  private var notificationResourceId = 0
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     if (channel == null) {
@@ -56,7 +48,6 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     if (bluedotServiceChannel == null)
         bluedotServiceChannel = MethodChannel(flutterPluginBinding.binaryMessenger, BLUEDOT_SERVICE_CHANNEL)
 
-    context = flutterPluginBinding.applicationContext
     serviceManager = ServiceManager.getInstance(flutterPluginBinding.applicationContext)
   }
 
@@ -68,16 +59,18 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
   override fun onMethodCall(call: MethodCall, result: Result) {
     when (call.method) {
       "isInitialized" -> result.success(serviceManager.isBluedotServiceInitialized)
-      "isGeoTriggeringRunning" -> result.success(GeoTriggeringService.isRunning(context))
-      "isTempoRunning" -> result.success(TempoService.isRunning(context))
+      "isGeoTriggeringRunning" -> result.success(GeoTriggeringService.isRunning())
+      "isTempoRunning" -> result.success(TempoService.isRunning())
       "initialize" -> initialize(call, result)
-      "androidStartGeoTriggering" -> startGeoTriggering(call, result)
+      "androidStartGeoTriggering" -> startGeoTriggering(result)
       "stopGeoTriggering" -> stopGeoTriggering(result)
       "androidStartTempoTracking" -> startTempoTracking(call, result)
       "stopTempoTracking" -> stopTempoTracking(result)
       "setCustomEventMetaData" -> setCustomEventMetaData(call, result)
-      "setNotificationIcon" -> setNotificationIcon(call)
       "setZoneDisableByApplication" -> setZoneDisableByApplication(call)
+      "linkForegroundService" -> linkForegroundService(result)
+      "unlinkForegroundService" -> unlinkForegroundService(result)
+      "isForegroundServiceLinked" -> result.success(serviceManager.isForegroundServiceLinked)
       "reset" -> reset(result)
       "getInstallRef" -> result.success(serviceManager.installRef)
       "getSDKVersion" -> result.success(serviceManager.sdkVersion)
@@ -102,60 +95,22 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
-  private fun startGeoTriggering(call: MethodCall, result: Result) {
-    // set a default notification icon if not yet set
-    if (notificationResourceId == 0) {
-      updateNotificationResource(null)
-    }
-
-    val channelId: String? = call.argument("channelId")
-    val channelName: String? = call.argument("channelName")
-    val title: String? = call.argument("title")
-    val content: String? = call.argument("content")
-    val notificationId: Int = call.argument("notificationId") ?: -1
-
+  private fun startGeoTriggering(result: Result) {
     val geoTriggeringStatusListener = GeoTriggeringStatusListener { error ->
       handleError(error, result)
     }
-    if (title.isNullOrBlank() || content.isNullOrBlank()) {
-      GeoTriggeringService.builder().start(context, geoTriggeringStatusListener)
-    } else {
-      if (channelId.isNullOrBlank() || channelName.isNullOrBlank()) {
-        result.error(
-          "Missing parameters",
-          "Missing parameters for channelId, channelName, title or content",
-          ""
-        )
-        return
-      }
-      val notification = createNotification(channelId, channelName, title, content)
-      if (notificationId != -1) {
-        GeoTriggeringService.builder()
-          .notificationId(notificationId)
-          .notification(notification)
-          .start(context, geoTriggeringStatusListener)
-      } else {
-        GeoTriggeringService.builder()
-          .notification(notification)
-          .start(context, geoTriggeringStatusListener)
-      }
-    }
+    GeoTriggeringService.builder().start(geoTriggeringStatusListener)
   }
 
   private fun stopGeoTriggering(result: Result) {
     val geoTriggeringStatusListener = GeoTriggeringStatusListener { error ->
       handleError(error, result)
     }
-    GeoTriggeringService.stop(context, geoTriggeringStatusListener)
+    GeoTriggeringService.stop(geoTriggeringStatusListener)
   }
 
   private fun startTempoTracking(call: MethodCall, result: Result) {
     val destinationId: String? = call.argument("destinationId")
-    val channelId: String? = call.argument("channelId")
-    val channelName: String? = call.argument("channelName")
-    val title: String? = call.argument("title")
-    val content: String? = call.argument("content")
-    val notificationId: Int = call.argument("notificationId") ?: -1
 
     val tempoServiceStatusListener = TempoServiceStatusListener { error ->
       handleError(error, result)
@@ -164,32 +119,57 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       result.error("Invalid destination id", "Destination Id is null or blank", "")
       return
     }
-    if (channelId.isNullOrBlank() || channelName.isNullOrBlank() || title.isNullOrBlank() || content.isNullOrBlank()) {
-      result.error(
-        "Missing parameters",
-        "Missing parameters for channelId, channelName, title or content",
-        ""
-      )
-      return
-    }
-    val notification = createNotification(channelId, channelName, title, content)
-    if (notificationId != -1) {
-      TempoService.builder()
-        .notificationId(notificationId)
-        .notification(notification)
-        .destinationId(destinationId)
-        .start(context, tempoServiceStatusListener)
-    } else {
-      TempoService.builder()
-        .notification(notification)
-        .destinationId(destinationId)
-        .start(context, tempoServiceStatusListener)
-    }
+    // Tempo requires a foreground service to be linked (see linkForegroundService()) before
+    // it is able to start; calling this without one linked fails synchronously via
+    // tempoServiceStatusListener.
+    TempoService.builder()
+      .destinationId(destinationId)
+      .start(tempoServiceStatusListener)
   }
 
   private fun stopTempoTracking(result: Result) {
-    val error: BDError? = TempoService.stop(context)
-    handleError(error, result)
+    // Use the onStopped overload so the Dart Future only resolves once Tempo has fully
+    // stopped (e.g. TempoService.isRunning() is guaranteed false), matching the semantics
+    // callers need to safely tear down a foreground service that was only linked for Tempo.
+    //
+    // onStopped may be invoked from a background dispatcher, so the reply is marshalled to
+    // the main looper (as AppGeoTriggeringReceiver does for its events). A reply-once guard
+    // also protects against TempoService.stop() returning a synchronous error and onStopped
+    // still firing later, which would otherwise submit a second reply on the same result.
+    val replied = AtomicBoolean(false)
+    val error: BDError? = TempoService.stop {
+      if (replied.compareAndSet(false, true)) {
+        Handler(Looper.getMainLooper()).post { result.success(null) }
+      }
+    }
+    if (error != null && replied.compareAndSet(false, true)) {
+      handleError(error, result)
+    }
+  }
+
+  private fun linkForegroundService(result: Result) {
+    try {
+      // Idempotent: a link already in place (e.g. from a previous call, or from the native
+      // BluedotForegroundServiceLinker) is left as-is rather than re-linked.
+      if (!serviceManager.isForegroundServiceLinked) {
+        serviceManager.linkForegroundService()
+      }
+      result.success(null)
+    } catch (e: Throwable) {
+      result.error("linkForegroundService failed", e.message, e.toString())
+    }
+  }
+
+  private fun unlinkForegroundService(result: Result) {
+    try {
+      // Idempotent: unlinking when nothing is linked is a no-op rather than an error.
+      if (serviceManager.isForegroundServiceLinked) {
+        serviceManager.unlinkForegroundService()
+      }
+      result.success(null)
+    } catch (e: Throwable) {
+      result.error("unlinkForegroundService failed", e.message, e.toString())
+    }
   }
 
   private fun setCustomEventMetaData(call: MethodCall, result: Result) {
@@ -201,43 +181,6 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       result.error(CustomEventMetaDataSetError().errorCode.toString(), err.message, err.toString())
     }
   }
-
-  private fun setNotificationIcon(call: MethodCall) {
-    val icon: String? = call.argument("icon")
-    updateNotificationResource(icon)
-  }
-
-  private fun updateNotificationResource(icon: String?) {
-    // find the resourceID int from the passed in icon name
-    var resourceID = findIconResourceId(icon)
-    if (resourceID == 0) {
-      // fallback to the default name of Notification Icon `ic_stat_name`
-      resourceID = findIconResourceId("ic_stat_name")
-    }
-
-    // save the resourceId and update to Bluedot PointSDK
-    notificationResourceId = resourceID
-    if (resourceID != 0) {
-      serviceManager.setNotificationIDResourceID(resourceID)
-    }
-  }
-
-  // Return the resourceId if available for icon name. Returns 0 if such resource doesn't exist
-  private fun findIconResourceId(icon: String?): Int {
-    if (icon == null) {
-      return 0
-    }
-    // find the resourceID int from the passed in icon name
-    val packageName: String = context.packageName
-    var resourceID: Int =
-      context.resources.getIdentifier(icon, "drawable", packageName)
-    if (resourceID == 0) {
-      // not found in drawable, try mipmap
-      resourceID = context.resources.getIdentifier(icon, "mipmap", packageName)
-    }
-    return resourceID
-  }
-
 
   private fun setZoneDisableByApplication(call: MethodCall) {
     val zoneId: String? = call.argument("zoneId")
@@ -290,61 +233,6 @@ class BluedotPointSdkPlugin: FlutterPlugin, MethodCallHandler {
       result.error(error.errorCode.toString(), error.reason, error.toString())
     } else {
       result.success(null)
-    }
-  }
-
-  private fun createNotification(
-    channelId: String,
-    channelName: String,
-    title: String,
-    content: String
-  ): Notification {
-
-    val activityIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
-    activityIntent?.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-    val pendingIntent = PendingIntent.getActivity(
-      context,
-      0,
-      activityIntent,
-      PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
-    // use the passed in resourceId as notification icon, if not available use the app icon
-    val iconResourceId =
-      if (notificationResourceId != 0) notificationResourceId else android.R.mipmap.sym_def_app_icon
-
-    val notificationManager =
-      context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      if (notificationManager.getNotificationChannel(channelId) == null) {
-        val notificationChannel = NotificationChannel(
-          channelId, channelName,
-          NotificationManager.IMPORTANCE_HIGH
-        )
-        notificationChannel.enableLights(false)
-        notificationChannel.lightColor = Color.RED
-        notificationChannel.enableVibration(false)
-        notificationManager.createNotificationChannel(notificationChannel)
-      }
-      val notification: Notification.Builder = Notification.Builder(context, channelId)
-        .setContentTitle(title)
-        .setContentText(content)
-        .setStyle(Notification.BigTextStyle().bigText(content))
-        .setOngoing(true)
-        .setCategory(Notification.CATEGORY_SERVICE)
-        .setContentIntent(pendingIntent)
-        .setSmallIcon(iconResourceId)
-      notification.build()
-    } else {
-      val notification: NotificationCompat.Builder = NotificationCompat.Builder(context, channelId)
-        .setContentTitle(title)
-        .setContentText(content)
-        .setStyle(NotificationCompat.BigTextStyle().bigText(content))
-        .setOngoing(true)
-        .setCategory(Notification.CATEGORY_SERVICE)
-        .setPriority(NotificationManager.IMPORTANCE_HIGH)
-        .setContentIntent(pendingIntent)
-        .setSmallIcon(iconResourceId)
-      notification.build()
     }
   }
 

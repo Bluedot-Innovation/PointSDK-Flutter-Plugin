@@ -4,7 +4,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'bluedot_point_sdk'
-  s.version          = '2.2.0'
+  s.version          = '3.0.0'
   s.summary          = 'Bluedot Point SDK for Flutter'
   s.description      = <<-DESC
                         Bluedot Point SDK for Flutter
